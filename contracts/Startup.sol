@@ -87,7 +87,6 @@ contract Company is ERC20, AccessControl {
 
     /// @dev Allows to remove an founder. Transaction has to be sent by wallet.
     /// @param founder Address of founder.
-    // TODO: Handle removal! Not finished!
     function removeFounder(address founder)
         public
         onlyWallet
@@ -96,7 +95,7 @@ contract Company is ERC20, AccessControl {
         isFounder[founder] = false;
         for (uint256 i = 0; i < founders.length - 1; i++)
             if (founders[i] == founder) {
-                founders[i] = founders[founders.length - 1];
+                delete founders[i];
                 break;
             }
         emit LogRemoveFounder(founder);
