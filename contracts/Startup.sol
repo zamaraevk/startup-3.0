@@ -2,10 +2,9 @@
 
 pragma solidity >0.6.0;
 
-import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
-contract Company is ERC20, AccessControl {
+contract Startup is ERC20 {
     /*
      *  Events
      */
@@ -56,13 +55,11 @@ contract Company is ERC20, AccessControl {
      */
     /// @dev Contract constructor sets initial founders.
     /// @param _founders List of initial founders.
-    constructor(address[] memory _founders)
-        public
-        validRequirement(_founders.length)
-        ERC20("CompanyToken", "TKN")
-    {
-        _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
-
+    constructor(
+        string memory _companyName,
+        string memory _token,
+        address[] memory _founders
+    ) public validRequirement(_founders.length) ERC20(_companyName, _token) {
         for (uint256 i = 0; i < _founders.length; i++) {
             require(!isFounder[_founders[i]] && _founders[i] != address(0));
             isFounder[_founders[i]] = true;
@@ -103,7 +100,7 @@ contract Company is ERC20, AccessControl {
 
     // Fallback function - Called if other functions don't match call or
     // sent ether without data
-    fallback() external payable {
-        revert();
-    }
+    // fallback() external payable {
+    //     revert();
+    // }
 }
