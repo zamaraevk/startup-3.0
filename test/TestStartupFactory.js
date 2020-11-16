@@ -15,7 +15,8 @@ contract("StartupFactory", (accounts) => {
 
   it("should create new instance of the Startup", async () => {
     const tx = await startupFactoryInstance.create(companyName, ticker, [
-      (founder1, founder2),
+      founder1,
+      founder2,
     ]);
     const startupAddress = utils.getParamFromTxEvent(
       tx,

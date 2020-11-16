@@ -25,8 +25,8 @@ contract Startup is ERC20 {
     /*
      *  Modifiers
      */
-    modifier onlyWallet() {
-        require(msg.sender == address(this));
+    modifier onlyFounder() {
+        require(isFounder[msg.sender]);
         _;
     }
 
@@ -72,7 +72,7 @@ contract Startup is ERC20 {
     /// @param founder Address of new founder.
     function addFounder(address founder)
         public
-        onlyWallet
+        onlyFounder
         founderDoesNotExist(founder)
         notNull(founder)
         validRequirement(founders.length + 1)
@@ -86,7 +86,7 @@ contract Startup is ERC20 {
     /// @param founder Address of founder.
     function removeFounder(address founder)
         public
-        onlyWallet
+        onlyFounder
         founderExists(founder)
     {
         isFounder[founder] = false;
