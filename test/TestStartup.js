@@ -50,4 +50,14 @@ contract("Startup", (accounts) => {
 
     assert.equal(await startupInstance.isFounder(founder1), false);
   });
+
+  it("should equally distrubute total token supply between founders", async () => {
+    const totalSupply = await startupInstance.totalSupply();
+
+    const founder1Supply = await startupInstance.balanceOf(founder1);
+    const founder2Supply = await startupInstance.balanceOf(founder2);
+
+    assert.equal(Number(founder1Supply), Number(founder2Supply));
+    assert.equal(totalSupply, Number(founder1Supply) + Number(founder2Supply));
+  });
 });

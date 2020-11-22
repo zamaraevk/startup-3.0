@@ -1,5 +1,5 @@
-const StartupFactory = artifacts.require("StartupFactory.sol");
+const PrivateCompanyFactory = artifacts.require("PrivateCompanyFactory.sol");
 
 module.exports = function (deployer) {
-  deployer.deploy(StartupFactory);
+  deployer.deploy(PrivateCompanyFactory);
 };
