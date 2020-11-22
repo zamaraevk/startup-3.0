@@ -21,7 +21,7 @@ contract PrivateCompany is ERC20Private {
     /* Events */
     event LogFounderEquityDistribution(
         address founderAddress,
-        uint256 foundersShareAmount,
+        uint256 equityAmount,
         uint256 vestingTime
     );
 
@@ -67,18 +67,18 @@ contract PrivateCompany is ERC20Private {
 
         for (uint256 i = 0; i < _founders.length; i++) {
             require(_founders[i] != address(0));
-            uint256 foundersShareAmount = supply.div(_founders.length);
+            uint256 equityAmount = supply.div(_founders.length);
 
             equityHolders[_founders[i]] = EquityHolder(
                 block.timestamp,
                 0,
-                foundersShareAmount,
+                equityAmount,
                 _founders[i]
             );
 
             emit LogFounderEquityDistribution(
                 _founders[i],
-                foundersShareAmount,
+                equityAmount,
                 TOKEN_VESTING_TIME
             );
         }

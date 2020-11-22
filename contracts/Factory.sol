@@ -12,8 +12,7 @@ contract Factory {
 
     /* Public functions */
     /**
-     * @dev Returns number of instantiations by creator.
-     * @param creator Contract creator.
+     * @param creator Contract creator address.
      * @return Returns number of instantiations by creator.
      */
     function getInstantiationCount(address creator)
