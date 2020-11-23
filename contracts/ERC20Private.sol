@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: MIT
-
 pragma solidity >=0.6.0 <0.8.0;
 
 import "@openzeppelin/contracts/access/AccessControl.sol";
@@ -12,7 +11,7 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
  * predefined set of addresses. Example: Private company.
  */
 abstract contract ERC20Private is ERC20, AccessControl {
-    /* Constants */
+    // Constants
     bytes32 public constant OWNER_ROLE = keccak256("OWNER_ROLE");
 
     /**

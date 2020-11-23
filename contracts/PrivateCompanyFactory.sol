@@ -1,12 +1,11 @@
 // SPDX-License-Identifier: MIT
-
 pragma solidity >0.6.0;
 
 import "./PrivateCompany.sol";
 import "./Factory.sol";
 
 contract PrivateCompanyFactory is Factory {
-    /* Public functions */
+    // Public functions
     /**
      * @dev @dev Allows creation of Private Company instance.
      * @param _companyName Company name.

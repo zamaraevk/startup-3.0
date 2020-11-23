@@ -1,31 +1,34 @@
 // SPDX-License-Identifier: MIT
-
 pragma solidity >0.6.0;
 
 import "./ERC20Private.sol";
 import "./DateTimeLibrary.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 
+/**
+ * @title Private Company contract with predefined founders,
+ * simple vesting schedule and transaction agreement between all founders.
+ * @dev Internal token(equity) can only circulate between founders.
+ * @author Konstantin Zamaraev
+ * @notice This final project for Consensys bootcamp. DO NOT USE IN PRODUCTION.
+ */
 contract PrivateCompany is ERC20Private {
-    /* Libraries */
+    // Libraries
     using SafeMath for uint256;
     using BokkyPooBahsDateTimeLibrary for uint256;
 
-    /* Constants */
+    // Constants
     uint256 internal constant TOTAL_SUPPLY = 10000;
-    // 1 year for the cliff
-    uint256 internal constant TOKEN_CLIFF_TIME = 1;
-    // 4 years for the full vesting
-    uint256 internal constant TOKEN_VESTING_TIME = 4;
+    uint256 internal constant TOKEN_CLIFF_TIME = 1; // 1 year for the cliff
+    uint256 internal constant TOKEN_VESTING_TIME = 4; // 4 years for the full vesting
 
-    /* Events */
-    event LogDeposit(address indexed sender, uint value);
+    // Events
+    event LogDeposit(address indexed sender, uint256 value);
     event LogFounderEquityDistribution(
         address indexed founderAddress,
         uint256 equityAmount,
         uint256 vestingTime
     );
-
     event LogReleasedEquityForHolder(
         address indexed founderAddress,
         uint256 equityAmount
@@ -38,15 +41,15 @@ contract PrivateCompany is ERC20Private {
         uint256 indexed transactionId
     );
 
-    /* Storage */
+    // Storage
     address[] public founders;
     mapping(address => EquityHolder) equityHolders;
     mapping(uint256 => Transaction) public transactions;
     mapping(uint256 => mapping(address => bool)) public confirmations;
-
     uint256 public transactionCount;
+    bool public stopped = false;
 
-    /* Structs */
+    // Structs
     struct EquityHolder {
         uint256 lockTimeStart;
         uint256 currentBalance;
@@ -61,7 +64,12 @@ contract PrivateCompany is ERC20Private {
         bool executed;
     }
 
-    /* Modifiers */
+    // Modifiers
+    modifier stopInEmergency {
+        require(!stopped);
+        _;
+    }
+
     modifier notNull(address _address) {
         require(_address != address(0));
         _;
@@ -102,7 +110,7 @@ contract PrivateCompany is ERC20Private {
         if (msg.value > 0) LogDeposit(msg.sender, msg.value);
     }
 
-    /* Public functions */
+    // Public functions
     /**
      * @dev Contract constructor creates private token and sets equal amounts
      * with the vesting schedule (1 year cliff / 4 years duration)
@@ -135,6 +143,17 @@ contract PrivateCompany is ERC20Private {
             );
         }
         founders = _founders;
+    }
+
+    /**
+     * @dev Emergency only! Block transaction submition/confirmation/execution
+     */
+    function stopContract() public isFounder() {
+        stopped = true;
+    }
+
+    function resumeContract() public isFounder() {
+        stopped = false;
     }
 
     /**
@@ -179,7 +198,7 @@ contract PrivateCompany is ERC20Private {
         address destination,
         uint256 value,
         bytes memory data
-    ) public isFounder() returns (uint256 transactionId) {
+    ) public stopInEmergency isFounder() returns (uint256 transactionId) {
         transactionId = _addTransaction(destination, value, data);
         confirmTransaction(transactionId);
     }
@@ -190,6 +209,7 @@ contract PrivateCompany is ERC20Private {
      */
     function confirmTransaction(uint256 transactionId)
         public
+        stopInEmergency
         isFounder()
         transactionExists(transactionId)
         notConfirmed(transactionId)
@@ -205,6 +225,7 @@ contract PrivateCompany is ERC20Private {
      */
     function executeTransaction(uint256 transactionId)
         public
+        stopInEmergency
         isFounder()
         confirmed(transactionId)
         notExecuted(transactionId)
@@ -238,7 +259,7 @@ contract PrivateCompany is ERC20Private {
         }
     }
 
-    /* Private functions */
+    // Private functions
     /**
      * @param holderAddress address of equity holder.
      */
@@ -281,7 +302,7 @@ contract PrivateCompany is ERC20Private {
         }
     }
 
-    /* Internal functions */
+    // Internal functions
     /**
      * @dev Adds a new transaction to the transaction mapping, if transaction does not exist yet.
      * @param destination Transaction target address.
