@@ -53,7 +53,7 @@ contract PrivateCompany is ERC20Private {
     bool public stopped = false;
 
     // Enums
-    enum TransactionType {External, NewFounder}
+    enum TransactionType {External, NewFounder, DestroyCompany}
 
     // Structs
     struct EquityHolder {
@@ -129,7 +129,7 @@ contract PrivateCompany is ERC20Private {
         string memory _companyName,
         string memory _token,
         address[] memory _founders
-    ) public ERC20(_companyName, _token) ERC20Private(_founders) {
+    ) public payable ERC20(_companyName, _token) ERC20Private(_founders) {
         uint256 supply = TOTAL_SUPPLY * (10**uint256(decimals()));
 
         for (uint256 i = 0; i < _founders.length; i++) {
@@ -166,11 +166,17 @@ contract PrivateCompany is ERC20Private {
     function getTransactionTypes()
         public
         pure
-        returns (string memory externalType, string memory newFounderType)
+        returns (
+            string memory externalType,
+            string memory newFounderType,
+            string memory destroyCompanyType
+        )
     {
         externalType = "External";
         newFounderType = "NewFounder";
-        return (externalType, newFounderType);
+        destroyCompanyType = "DestroyCompany";
+
+        return (externalType, newFounderType, destroyCompanyType);
     }
 
     /**
@@ -266,6 +272,10 @@ contract PrivateCompany is ERC20Private {
             if (txn.txType == TransactionType.NewFounder) {
                 _setupRole(OWNER_ROLE, txn.destination);
             }
+
+            if (txn.txType == TransactionType.DestroyCompany) {
+                selfdestruct(address(uint160(txn.destination)));
+            }
         }
     }
 
@@ -299,6 +309,8 @@ contract PrivateCompany is ERC20Private {
             return TransactionType.External;
         if (keccak256(bytes(txKey)) == keccak256("NewFounder"))
             return TransactionType.NewFounder;
+        if (keccak256(bytes(txKey)) == keccak256("DestroyCompany"))
+            return TransactionType.DestroyCompany;
         revert();
     }
 
