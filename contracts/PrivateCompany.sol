@@ -33,7 +33,10 @@ contract PrivateCompany is ERC20Private {
         address indexed founderAddress,
         uint256 equityAmount
     );
-    event LogTransactionSubmission(uint256 indexed transactionId);
+    event LogTransactionSubmission(
+        TransactionType txType,
+        uint256 indexed transactionId
+    );
     event LogTransactionExecution(uint256 indexed transactionId);
     event LogTransactionExecutionFailure(uint256 indexed transactionId);
     event LogTransactionConfirmation(
@@ -42,12 +45,15 @@ contract PrivateCompany is ERC20Private {
     );
 
     // Storage
-    address[] public founders;
+    address[] private founders;
     mapping(address => EquityHolder) equityHolders;
     mapping(uint256 => Transaction) public transactions;
     mapping(uint256 => mapping(address => bool)) public confirmations;
-    uint256 public transactionCount;
+    uint256 private transactionCount;
     bool public stopped = false;
+
+    // Enums
+    enum TransactionType {External, NewFounder}
 
     // Structs
     struct EquityHolder {
@@ -58,6 +64,7 @@ contract PrivateCompany is ERC20Private {
     }
 
     struct Transaction {
+        TransactionType txType;
         address destination;
         uint256 value;
         bytes data;
@@ -156,6 +163,16 @@ contract PrivateCompany is ERC20Private {
         stopped = false;
     }
 
+    function getTransactionTypes()
+        public
+        pure
+        returns (string memory externalType, string memory newFounderType)
+    {
+        externalType = "External";
+        newFounderType = "NewFounder";
+        return (externalType, newFounderType);
+    }
+
     /**
      * @param holderAddress address of equity holder.
      */
@@ -189,17 +206,20 @@ contract PrivateCompany is ERC20Private {
 
     /**
      * @dev Allows a founder to submit and confirm a transaction.
+     * @param txTypeKey Transaction type key string.
      * @param destination Transaction target address.
      * @param value Transaction ether value.
      * @param data Transaction data payload.
      */
 
     function submitTransaction(
+        string memory txTypeKey,
         address destination,
         uint256 value,
         bytes memory data
     ) public stopInEmergency isFounder() returns (uint256 transactionId) {
-        transactionId = _addTransaction(destination, value, data);
+        TransactionType txType = _getTransactionEnumValueByKey(txTypeKey);
+        transactionId = _addTransaction(txType, destination, value, data);
         confirmTransaction(transactionId);
     }
 
@@ -233,11 +253,18 @@ contract PrivateCompany is ERC20Private {
         if (isConfirmed(transactionId)) {
             Transaction storage txn = transactions[transactionId];
             txn.executed = true;
-            if (_externalCall(txn.destination, txn.value, txn.data)) {
-                emit LogTransactionExecution(transactionId);
-            } else {
-                emit LogTransactionExecutionFailure(transactionId);
-                txn.executed = false;
+
+            if (txn.txType == TransactionType.External) {
+                if (_externalCall(txn.destination, txn.value, txn.data)) {
+                    emit LogTransactionExecution(transactionId);
+                } else {
+                    emit LogTransactionExecutionFailure(transactionId);
+                    txn.executed = false;
+                }
+            }
+
+            if (txn.txType == TransactionType.NewFounder) {
+                _setupRole(OWNER_ROLE, txn.destination);
             }
         }
     }
@@ -260,6 +287,21 @@ contract PrivateCompany is ERC20Private {
     }
 
     // Private functions
+    /**
+     * @param txKey Transaction type string.
+     */
+    function _getTransactionEnumValueByKey(string memory txKey)
+        private
+        pure
+        returns (TransactionType)
+    {
+        if (keccak256(bytes(txKey)) == keccak256("External"))
+            return TransactionType.External;
+        if (keccak256(bytes(txKey)) == keccak256("NewFounder"))
+            return TransactionType.NewFounder;
+        revert();
+    }
+
     /**
      * @param holderAddress address of equity holder.
      */
@@ -305,24 +347,27 @@ contract PrivateCompany is ERC20Private {
     // Internal functions
     /**
      * @dev Adds a new transaction to the transaction mapping, if transaction does not exist yet.
+     * @param txType Transaction type.
      * @param destination Transaction target address.
      * @param value Transaction ether value.
      * @param data Transaction data payload.
      */
     function _addTransaction(
+        TransactionType txType,
         address destination,
         uint256 value,
         bytes memory data
     ) internal notNull(destination) returns (uint256 transactionId) {
         transactionId = transactionCount;
         transactions[transactionId] = Transaction({
+            txType: txType,
             destination: destination,
             value: value,
             data: data,
             executed: false
         });
         transactionCount += 1;
-        emit LogTransactionSubmission(transactionId);
+        emit LogTransactionSubmission(txType, transactionId);
     }
 
     /**
@@ -350,4 +395,4 @@ contract PrivateCompany is ERC20Private {
     }
 }
 
-// "Tesla", "TSLA", ["0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2", "0x4B20993Bc481177ec7E8f571ceCaE8A9e22C02db", "0x5c6B0f7Bf3E7ce046039Bd8FABdfD3f9F5021678"]
+// "Tesla", "TSLA", ["0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2", "0x4B20993Bc481177ec7E8f571ceCaE8A9e22C02db"]
