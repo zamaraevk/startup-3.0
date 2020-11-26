@@ -23,6 +23,14 @@ contract("PrivateCompany", (accounts) => {
     assert.ok(privateCompanyInstance);
   });
 
+  it("should have list of founders", async () => {
+    const f1 = await privateCompanyInstance.founders(0);
+    const f2 = await privateCompanyInstance.founders(1);
+
+    assert.equal(f1, founder1);
+    assert.equal(f2, founder2);
+  });
+
   it("should check founder(company owner) role", async () => {
     const ownerRole = await privateCompanyInstance.OWNER_ROLE();
 

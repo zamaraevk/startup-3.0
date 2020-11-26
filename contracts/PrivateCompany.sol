@@ -45,8 +45,8 @@ contract PrivateCompany is ERC20Private {
     );
 
     // Storage
-    uint256 private equityPool;
-    address[] private founders;
+    uint256 public equityPool;
+    address[] public founders;
     mapping(address => EquityHolder) equityHolders;
     mapping(uint256 => Transaction) public transactions;
     mapping(uint256 => mapping(address => bool)) public confirmations;
