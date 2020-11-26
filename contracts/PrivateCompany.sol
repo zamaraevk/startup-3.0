@@ -45,6 +45,7 @@ contract PrivateCompany is ERC20Private {
     );
 
     // Storage
+    uint256 private equityPool;
     address[] private founders;
     mapping(address => EquityHolder) equityHolders;
     mapping(uint256 => Transaction) public transactions;
@@ -130,11 +131,15 @@ contract PrivateCompany is ERC20Private {
         string memory _token,
         address[] memory _founders
     ) public payable ERC20(_companyName, _token) ERC20Private(_founders) {
-        uint256 supply = TOTAL_SUPPLY * (10**uint256(decimals()));
+        uint256 totalSupply = TOTAL_SUPPLY.mul(10**uint256(decimals()));
+        uint256 founderDistributonSupply = totalSupply.mul(90).div(100); // 90% goes to initial founders / 10% to equity pool
+        equityPool = totalSupply.sub(founderDistributonSupply);
 
         for (uint256 i = 0; i < _founders.length; i++) {
             require(_founders[i] != address(0));
-            uint256 equityAmount = supply.div(_founders.length);
+            uint256 equityAmount = founderDistributonSupply.div(
+                _founders.length
+            );
 
             equityHolders[_founders[i]] = EquityHolder(
                 block.timestamp,
@@ -270,7 +275,7 @@ contract PrivateCompany is ERC20Private {
             }
 
             if (txn.txType == TransactionType.NewFounder) {
-                _setupRole(OWNER_ROLE, txn.destination);
+                _addNewFounder(txn.destination);
             }
 
             if (txn.txType == TransactionType.DestroyCompany) {
@@ -297,6 +302,40 @@ contract PrivateCompany is ERC20Private {
     }
 
     // Private functions
+    /**
+     * @dev return 10% from equity pool.
+     */
+    function _equityPoolDistribution()
+        private
+        returns (uint256 equityAllocation)
+    {
+        equityAllocation = equityPool.mul(10).div(100);
+        equityPool -= equityAllocation;
+        return equityAllocation;
+    }
+
+    /**
+     * @param founderAddress new founder address.
+     */
+    function _addNewFounder(address founderAddress) private returns (bool) {
+        uint256 equityAmount = _equityPoolDistribution();
+        equityHolders[founderAddress] = EquityHolder(
+            block.timestamp,
+            0,
+            equityAmount,
+            founderAddress
+        );
+
+        emit LogFounderEquityDistribution(
+            founderAddress,
+            equityAmount,
+            TOKEN_VESTING_TIME
+        );
+
+        _setupRole(OWNER_ROLE, founderAddress);
+        founders.push(founderAddress);
+    }
+
     /**
      * @param txKey Transaction type string.
      */
