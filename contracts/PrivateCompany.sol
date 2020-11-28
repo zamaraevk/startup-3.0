@@ -19,7 +19,6 @@ contract PrivateCompany is ERC20Private {
 
     // Constants
     uint256 internal constant TOTAL_SUPPLY = 10000;
-    uint256 internal constant TOKEN_CLIFF_TIME = 1; // 1 year for the cliff
     uint256 internal constant TOKEN_VESTING_TIME = 4; // 4 years for the full vesting
 
     // Events
@@ -45,7 +44,7 @@ contract PrivateCompany is ERC20Private {
     );
 
     // Storage
-    uint256 public equityPool;
+    uint256 private equityPool;
     address[] public founders;
     mapping(address => EquityHolder) equityHolders;
     mapping(uint256 => Transaction) public transactions;
@@ -54,12 +53,18 @@ contract PrivateCompany is ERC20Private {
     bool public stopped = false;
 
     // Enums
-    enum TransactionType {External, NewFounder, DestroyCompany}
+    enum TransactionType {
+        External,
+        NewFounder,
+        LaunchVestingSchedule,
+        DestroyCompany
+    }
 
     // Structs
     struct EquityHolder {
         uint256 lockTimeStart;
         uint256 currentBalance;
+        uint256 lockedBalance;
         uint256 totalBalance;
         address holderAddress;
     }
@@ -103,7 +108,7 @@ contract PrivateCompany is ERC20Private {
         _;
     }
 
-    modifier isFounder() {
+    modifier onlyFounder() {
         require(
             hasRole(OWNER_ROLE, msg.sender),
             "PrivateCompany: sender is not a founder"
@@ -121,50 +126,27 @@ contract PrivateCompany is ERC20Private {
     // Public functions
     /**
      * @dev Contract constructor creates private token and sets equal amounts
-     * with the vesting schedule (1 year cliff / 4 years duration)
+     * with the vesting schedule (4 years duration)
      * @param _companyName Company name.
      * @param _token Company(token) ticker name.
-     * @param _founders List of initial founders of the company.
      */
-    constructor(
-        string memory _companyName,
-        string memory _token,
-        address[] memory _founders
-    ) public payable ERC20(_companyName, _token) ERC20Private(_founders) {
-        uint256 totalSupply = TOTAL_SUPPLY.mul(10**uint256(decimals()));
-        uint256 founderDistributonSupply = totalSupply.mul(90).div(100); // 90% goes to initial founders / 10% to equity pool
-        equityPool = totalSupply.sub(founderDistributonSupply);
-
-        for (uint256 i = 0; i < _founders.length; i++) {
-            require(_founders[i] != address(0));
-            uint256 equityAmount = founderDistributonSupply.div(
-                _founders.length
-            );
-
-            equityHolders[_founders[i]] = EquityHolder(
-                block.timestamp,
-                0,
-                equityAmount,
-                _founders[i]
-            );
-
-            emit LogFounderEquityDistribution(
-                _founders[i],
-                equityAmount,
-                TOKEN_VESTING_TIME
-            );
-        }
-        founders = _founders;
+    constructor(string memory _companyName, string memory _token)
+        public
+        payable
+        ERC20(_companyName, _token)
+        ERC20Private()
+    {
+        founders.push(msg.sender);
     }
 
     /**
      * @dev Emergency only! Block transaction submition/confirmation/execution
      */
-    function stopContract() public isFounder() {
+    function stopContract() public onlyFounder {
         stopped = true;
     }
 
-    function resumeContract() public isFounder() {
+    function resumeContract() public onlyFounder {
         stopped = false;
     }
 
@@ -174,14 +156,21 @@ contract PrivateCompany is ERC20Private {
         returns (
             string memory externalType,
             string memory newFounderType,
+            string memory launchVestingScheduleType,
             string memory destroyCompanyType
         )
     {
         externalType = "External";
         newFounderType = "NewFounder";
+        launchVestingScheduleType = "LaunchVestingSchedule";
         destroyCompanyType = "DestroyCompany";
 
-        return (externalType, newFounderType, destroyCompanyType);
+        return (
+            externalType,
+            newFounderType,
+            launchVestingScheduleType,
+            destroyCompanyType
+        );
     }
 
     /**
@@ -190,15 +179,20 @@ contract PrivateCompany is ERC20Private {
     function getEquityHolderBalance(address holderAddress)
         public
         view
-        returns (uint256 currentBalance, uint256 totalBalance)
+        returns (
+            uint256 currentBalance,
+            uint256 lockedBalance,
+            uint256 totalBalance
+        )
     {
         currentBalance = equityHolders[holderAddress].currentBalance;
+        lockedBalance = equityHolders[holderAddress].lockedBalance;
         totalBalance = equityHolders[holderAddress].totalBalance;
 
-        return (currentBalance, totalBalance);
+        return (currentBalance, lockedBalance, totalBalance);
     }
 
-    function releaseVestedEquity() public isFounder() {
+    function releaseVestedEquity() public onlyFounder {
         uint256 unreleasedAmount = _releasableEquityAmount(msg.sender);
 
         require(
@@ -206,8 +200,13 @@ contract PrivateCompany is ERC20Private {
             "PrivateCompany: no tokens to release at this time"
         );
 
-        uint256 currentBalance = equityHolders[msg.sender].currentBalance;
-        equityHolders[msg.sender].currentBalance = currentBalance.add(
+        EquityHolder storage equityHolder = equityHolders[msg.sender];
+
+        equityHolder.currentBalance = equityHolder.currentBalance.add(
+            unreleasedAmount
+        );
+
+        equityHolder.lockedBalance = equityHolder.lockedBalance.sub(
             unreleasedAmount
         );
 
@@ -228,7 +227,7 @@ contract PrivateCompany is ERC20Private {
         address destination,
         uint256 value,
         bytes memory data
-    ) public stopInEmergency isFounder() returns (uint256 transactionId) {
+    ) public stopInEmergency onlyFounder returns (uint256 transactionId) {
         TransactionType txType = _getTransactionEnumValueByKey(txTypeKey);
         transactionId = _addTransaction(txType, destination, value, data);
         confirmTransaction(transactionId);
@@ -241,7 +240,7 @@ contract PrivateCompany is ERC20Private {
     function confirmTransaction(uint256 transactionId)
         public
         stopInEmergency
-        isFounder()
+        onlyFounder
         transactionExists(transactionId)
         notConfirmed(transactionId)
     {
@@ -257,7 +256,7 @@ contract PrivateCompany is ERC20Private {
     function executeTransaction(uint256 transactionId)
         public
         stopInEmergency
-        isFounder()
+        onlyFounder
         confirmed(transactionId)
         notExecuted(transactionId)
     {
@@ -276,6 +275,10 @@ contract PrivateCompany is ERC20Private {
 
             if (txn.txType == TransactionType.NewFounder) {
                 _addNewFounder(txn.destination);
+            }
+
+            if (txn.txType == TransactionType.LaunchVestingSchedule) {
+                _launchVestingSchedule();
             }
 
             if (txn.txType == TransactionType.DestroyCompany) {
@@ -302,37 +305,36 @@ contract PrivateCompany is ERC20Private {
     }
 
     // Private functions
-    /**
-     * @dev return 10% from equity pool.
-     */
-    function _equityPoolDistribution()
-        private
-        returns (uint256 equityAllocation)
-    {
-        equityAllocation = equityPool.mul(10).div(100);
-        equityPool -= equityAllocation;
-        return equityAllocation;
+    function _launchVestingSchedule() private onlyFounder {
+        uint256 totalSupply = TOTAL_SUPPLY.mul(10**uint256(decimals()));
+        uint256 founderDistributonSupply = totalSupply.mul(90).div(100); // 90% goes to initial founders / 10% to equity pool
+        equityPool = totalSupply.sub(founderDistributonSupply);
+        uint256 equityAmount = founderDistributonSupply.div(founders.length);
+
+        for (uint256 i = 0; i < founders.length; i++) {
+            equityHolders[founders[i]] = EquityHolder(
+                block.timestamp,
+                0,
+                equityAmount,
+                equityAmount,
+                founders[i]
+            );
+
+            emit LogFounderEquityDistribution(
+                founders[i],
+                equityAmount,
+                TOKEN_VESTING_TIME
+            );
+        }
     }
 
     /**
      * @param founderAddress new founder address.
      */
     function _addNewFounder(address founderAddress) private returns (bool) {
-        uint256 equityAmount = _equityPoolDistribution();
-        equityHolders[founderAddress] = EquityHolder(
-            block.timestamp,
-            0,
-            equityAmount,
-            founderAddress
-        );
+        require(founderAddress != address(0));
 
-        emit LogFounderEquityDistribution(
-            founderAddress,
-            equityAmount,
-            TOKEN_VESTING_TIME
-        );
-
-        _setupRole(OWNER_ROLE, founderAddress);
+        _addOwner(founderAddress);
         founders.push(founderAddress);
     }
 
@@ -348,6 +350,8 @@ contract PrivateCompany is ERC20Private {
             return TransactionType.External;
         if (keccak256(bytes(txKey)) == keccak256("NewFounder"))
             return TransactionType.NewFounder;
+        if (keccak256(bytes(txKey)) == keccak256("LaunchVestingSchedule"))
+            return TransactionType.LaunchVestingSchedule;
         if (keccak256(bytes(txKey)) == keccak256("DestroyCompany"))
             return TransactionType.DestroyCompany;
         revert();
@@ -368,34 +372,28 @@ contract PrivateCompany is ERC20Private {
         return _vestedEquityAmount(holderAddress).sub(currentBalance);
     }
 
+    // Internal functions
     /**
      * @param holderAddress address of equity holder.
      */
     function _vestedEquityAmount(address holderAddress)
-        private
+        internal
         view
         returns (uint256)
     {
         EquityHolder memory holder = equityHolders[holderAddress];
         uint256 totalBalance = holder.totalBalance;
         uint256 lockTimeStart = holder.lockTimeStart;
-        uint256 cliffTime = holder.lockTimeStart.addYears(TOKEN_CLIFF_TIME);
+        uint256 durationLeft = block.timestamp.sub(lockTimeStart);
+        uint256 durationFull = lockTimeStart.addYears(TOKEN_VESTING_TIME);
 
-        if (block.timestamp < cliffTime) {
-            return 0;
-        } else if (
-            block.timestamp >= lockTimeStart.addYears(TOKEN_VESTING_TIME)
-        ) {
+        if (block.timestamp >= durationFull) {
             return totalBalance;
         } else {
-            return
-                totalBalance.mul(block.timestamp.sub(lockTimeStart)).div(
-                    TOKEN_VESTING_TIME
-                );
+            return totalBalance.mul(durationLeft).div(durationFull);
         }
     }
 
-    // Internal functions
     /**
      * @dev Adds a new transaction to the transaction mapping, if transaction does not exist yet.
      * @param txType Transaction type.

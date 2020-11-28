@@ -10,15 +10,13 @@ contract PrivateCompanyFactory is Factory {
      * @dev @dev Allows creation of Private Company instance.
      * @param _companyName Company name.
      * @param _token Company(token) ticker name.
-     * @param _founders List of initial founders of the company.
      */
     function create(
         string memory _companyName,
-        string memory _token,
-        address[] memory _founders
+        string memory _token
     ) public returns (address companyAddress) {
         companyAddress = address(
-            new PrivateCompany(_companyName, _token, _founders)
+            new PrivateCompany(_companyName, _token)
         );
         register(companyAddress);
     }
