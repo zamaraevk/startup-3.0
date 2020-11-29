@@ -192,6 +192,11 @@ contract("PrivateCompany", (accounts) => {
         founder
       );
 
+      expect(
+        Number(equityHolder.lockedBalance) +
+          Number(equityHolder.currentBalance) ===
+          Number(equityHolder.totalBalance)
+      ).to.be.true;
       expect(Number(equityHolder.currentBalance) === Number(balance)).to.be
         .true;
     });
