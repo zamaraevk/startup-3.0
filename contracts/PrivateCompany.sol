@@ -42,6 +42,8 @@ contract PrivateCompany is ERC20Private {
         address indexed sender,
         uint256 indexed transactionId
     );
+    event LogContractStopped();
+    event LogContractResume();
 
     // Storage
     uint256 private equityPool;
@@ -144,10 +146,12 @@ contract PrivateCompany is ERC20Private {
      */
     function stopContract() public onlyFounder {
         stopped = true;
+        emit LogContractStopped();
     }
 
     function resumeContract() public onlyFounder {
         stopped = false;
+        emit LogContractResume();
     }
 
     function getTransactionTypes()

@@ -133,4 +133,91 @@ contract("PrivateCompany", (accounts) => {
       ).to.be.true;
     });
   });
+
+  describe("destroy company", async function () {
+    it("allows to submit new transaction with type DestroyCompany", async function () {
+      const destination = newFounder;
+      const value = 0;
+      const data = "0x00";
+      // Add one more founder to test consensus
+      const destroyCompanyScheduleTx = await privateCompanyInstance.submitTransaction(
+        "DestroyCompany",
+        destination,
+        value,
+        data,
+        {
+          from: founder,
+        }
+      );
+
+      const txEventNames = destroyCompanyScheduleTx.logs.map(
+        (log) => log.event
+      );
+
+      expect(txEventNames.includes("LogTransactionSubmission")).to.be.true;
+      expect(txEventNames.includes("LogTransactionConfirmation")).to.be.true;
+    });
+  });
+
+  describe("release vested equity", async function () {
+    it("allows to release equities that was vested by current time from lock time start", async function () {
+      const destination = founder;
+      const value = 0;
+      const data = "0x00";
+
+      // Create and confirm LaunchVestingSchedule from founder
+      await privateCompanyInstance.submitTransaction(
+        "LaunchVestingSchedule",
+        destination,
+        value,
+        data,
+        {
+          from: founder,
+        }
+      );
+
+      const days10 = 86400 * 10; // 10 Days
+      utils.advanceTime(days10); // Jump forward in time
+
+      // Release vested equity
+      await privateCompanyInstance.releaseVestedEquity({
+        from: founder,
+      });
+
+      // Balance
+      const balance = await privateCompanyInstance.balanceOf(founder);
+
+      // Check equity holder balances after distribution.
+      const equityHolder = await privateCompanyInstance.getEquityHolderBalance(
+        founder
+      );
+
+      expect(Number(equityHolder.currentBalance) === Number(balance)).to.be
+        .true;
+    });
+  });
+
+  describe("circuit breaker", async function () {
+    it("revert if contract stopped", async function () {
+      const destination = founder;
+      const value = 0;
+      const data = "0x00";
+
+      await privateCompanyInstance.stopContract({ from: founder });
+
+      // Create and confirm LaunchVestingSchedule from founder
+      await expectRevert(
+        privateCompanyInstance.submitTransaction(
+          "LaunchVestingSchedule",
+          destination,
+          value,
+          data,
+          {
+            from: founder,
+          }
+        ),
+        "revert"
+      );
+    });
+  });
 });
