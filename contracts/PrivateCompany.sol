@@ -447,3 +447,5 @@ contract PrivateCompany is ERC20Private {
         return result;
     }
 }
+
+// "test","TST"

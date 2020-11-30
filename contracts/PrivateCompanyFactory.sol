@@ -19,5 +19,6 @@ contract PrivateCompanyFactory is Factory {
             new PrivateCompany(_companyName, _token)
         );
         register(companyAddress);
+        return companyAddress;
     }
 }
