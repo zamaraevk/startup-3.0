@@ -154,6 +154,29 @@ contract PrivateCompany is ERC20Private {
         emit LogContractResume();
     }
 
+    function getLastTransactionDetails(address holderAddress)
+        public
+        view
+        returns (
+            bool isConfirmedByMe,
+            bool isExecuted,
+            TransactionType txType
+        )
+    {
+        uint256 lastTxId = 0;
+
+        if (transactionCount > 0) {
+            lastTxId = transactionCount.sub(1);
+        }
+
+        Transaction memory lastTx = transactions[lastTxId];
+        isConfirmedByMe = confirmations[lastTxId][holderAddress];
+        isExecuted = lastTx.executed;
+        txType = lastTx.txType;
+
+        return (isConfirmedByMe, isExecuted, txType);
+    }
+
     function getTransactionTypes()
         public
         pure

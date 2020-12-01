@@ -17,7 +17,7 @@ const PrivateCompanyCreate = ({ accounts, contract }) => {
       const instanceAddress =
         response.events["ContractInstantiation"].returnValues["instantiation"];
 
-      history.push(`/company/${instanceAddress}`);
+      history.push(`/company/${instanceAddress}/home`);
     } catch (error) {
       setLoading(false);
     }

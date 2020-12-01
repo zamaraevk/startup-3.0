@@ -3,12 +3,13 @@ import { Switch, Route, Link, withRouter } from "react-router-dom";
 import { Layout, Menu, Tag, Typography } from "antd";
 
 import PrivateCompanyContract from "../contracts/PrivateCompany.json";
-
 import {
   UploadOutlined,
   UserOutlined,
   VideoCameraOutlined,
 } from "@ant-design/icons";
+
+import DashboardContent from "./DashboardContent";
 
 const { Content, Sider } = Layout;
 const { Text } = Typography;
@@ -16,6 +17,7 @@ const { Text } = Typography;
 class PrivateCompanyDashboard extends Component {
   state = {
     companyName: null,
+    balance: null,
     ticker: null,
     companyContract: null,
   };
@@ -38,15 +40,23 @@ class PrivateCompanyDashboard extends Component {
       const ticker = await instance.methods
         .symbol()
         .call({ from: accounts[0] });
-      this.setState({ companyContract: instance, companyName, ticker });
+
+      const balance = await web3.eth.getBalance(address);
+
+      this.setState({
+        balance,
+        companyContract: instance,
+        companyName,
+        ticker,
+      });
     } catch (error) {
       console.log("errrrr", error);
     }
   };
 
   render() {
-    const { companyName, ticker } = this.state;
-    const { match } = this.props;
+    const { balance, companyContract, companyName, ticker } = this.state;
+    const { accounts, match } = this.props;
     const { path, url } = match;
 
     return (
@@ -72,34 +82,47 @@ class PrivateCompanyDashboard extends Component {
               </Text>
               <Tag color="#177ddc">{ticker}</Tag>
             </div>
-            <Menu theme="dark" mode="inline" defaultSelectedKeys={["1"]}>
-              <Menu.Item key="1" icon={<UserOutlined />}>
-                <Link to={`${url}`}>Home</Link>
+            <Menu theme="dark" mode="inline" defaultSelectedKeys={["home"]}>
+              <Menu.Item key="home" icon={<UserOutlined />}>
+                <Link to={`${url}/home`}>Home</Link>
               </Menu.Item>
-              <Menu.Item key="2" icon={<VideoCameraOutlined />}>
+              <Menu.Item key="founders" icon={<VideoCameraOutlined />}>
                 <Link to={`${url}/founders/1`}>Equity</Link>
               </Menu.Item>
-              <Menu.Item key="3" icon={<UploadOutlined />}>
+              <Menu.Item key="transactions" icon={<UploadOutlined />}>
                 <Link to={`${url}/transactions/1`}>Transactions</Link>
               </Menu.Item>
             </Menu>
           </Sider>
           <Layout>
-            <Content style={{ margin: "24px 16px 0" }}>
-              <div
-                className="site-layout-background"
-                style={{ padding: 24, minHeight: 360 }}
-              >
-                <Switch>
-                  <Route path={`${path}/founders/:founderAddress`}>
-                    <div>Founder page</div>
-                  </Route>
-                  <Route path={`${path}/transactions/:transactionId`}>
-                    <div>Transaction page</div>
-                  </Route>
-                </Switch>
-              </div>
-            </Content>
+            {companyContract && (
+              <Content style={{ margin: "24px 16px 0" }}>
+                <div
+                  className="site-layout-background"
+                  style={{
+                    padding: 24,
+                    minHeight: "100%",
+                  }}
+                >
+                  <Switch>
+                    <Route path={`${path}/home`}>
+                      <DashboardContent
+                        ticker={ticker}
+                        accounts={accounts}
+                        balance={balance}
+                        companyContract={companyContract}
+                      />
+                    </Route>
+                    <Route path={`${path}/founders/:founderAddress`}>
+                      <div>Founder page</div>
+                    </Route>
+                    <Route path={`${path}/transactions/:transactionId`}>
+                      <div>Transaction page</div>
+                    </Route>
+                  </Switch>
+                </div>
+              </Content>
+            )}
           </Layout>
         </Layout>
       </div>
