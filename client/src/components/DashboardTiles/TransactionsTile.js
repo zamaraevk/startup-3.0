@@ -1,5 +1,13 @@
 import React from "react";
-import { Card, List, Avatar, Button, Skeleton } from "antd";
+import { Card, List, Button, Tag } from "antd";
+import { UserAddOutlined, CheckCircleOutlined } from "@ant-design/icons";
+
+const transactionMap = {
+  0: "External",
+  1: "New founder",
+  2: "Launch vesting schedule",
+  3: "Destroy company contract",
+};
 
 const TransactionsTiles = ({ transactions }) => {
   return (
@@ -9,25 +17,41 @@ const TransactionsTiles = ({ transactions }) => {
         itemLayout="horizontal"
         // loadMore={loadMore}
         dataSource={transactions}
-        renderItem={(item) => (
-          <List.Item
-            actions={[
-              <a key="list-loadmore-edit">edit</a>,
-              <a key="list-loadmore-more">more</a>,
-            ]}
-          >
-            <Skeleton avatar title={false} loading={item.loading} active>
+        renderItem={(tx) => {
+          const isConfirmed = tx.isConfirmedByMe;
+          return (
+            <List.Item
+              actions={[
+                <Button type="primary" disabled={isConfirmed}>
+                  {isConfirmed ? "Confirmed" : "Confirm"}
+                </Button>,
+              ]}
+            >
               <List.Item.Meta
-                avatar={
-                  <Avatar src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png" />
+                avatar={<UserAddOutlined />}
+                title={
+                  <div>
+                    <div
+                      style={{
+                        display: "inline-block",
+                        width: 200,
+                      }}
+                    >
+                      {transactionMap[tx.txType]}
+                    </div>
+                    <Tag
+                      size="large"
+                      icon={<CheckCircleOutlined />}
+                      color="success"
+                    >
+                      success
+                    </Tag>
+                  </div>
                 }
-                title={<a href="https://ant.design">{item.name}</a>}
-                description="Ant Design, a design language for background applications, is refined by Ant UED Team"
               />
-              <div>content</div>
-            </Skeleton>
-          </List.Item>
-        )}
+            </List.Item>
+          );
+        }}
       />
     </Card>
   );

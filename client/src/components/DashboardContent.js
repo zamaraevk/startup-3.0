@@ -12,14 +12,16 @@ class DashboardContent extends Component {
     roleCount: "0",
     currentBalance: "0",
     lockedBalance: "0",
-    transactionCount: 0,
+    transactionCount: null,
     transactions: [],
     isModalVisible: false,
     loading: false,
   };
 
   componentDidMount = async () => {
+    const { transactions } = this.state;
     const { accounts, companyContract } = this.props;
+
     const ownerRole = await companyContract.methods
       .OWNER_ROLE()
       .call({ from: accounts[0] });
@@ -36,11 +38,16 @@ class DashboardContent extends Component {
       .transactionCount()
       .call({ from: accounts[0] });
 
+    const lastTransaction = await companyContract.methods
+      .getTransactionDetails(0)
+      .call({ from: accounts[0] });
+
     this.setState({
       roleCount,
       transactionCount,
       currentBalance: equityBalance.currentBalance,
       lockedBalance: equityBalance.lockedBalance,
+      transactions: [...transactions, lastTransaction],
     });
   };
 
@@ -73,10 +80,9 @@ class DashboardContent extends Component {
       transactions,
       isModalVisible,
       loading,
-      transactionCount
     } = this.state;
     const { balance, ticker } = this.props;
-    console.log("====", transactionCount)
+
     return (
       <div>
         <Row gutter={[16, 16]}>
