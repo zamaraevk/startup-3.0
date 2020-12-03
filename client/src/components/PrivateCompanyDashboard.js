@@ -89,9 +89,6 @@ class PrivateCompanyDashboard extends Component {
               <Menu.Item key="founders" icon={<VideoCameraOutlined />}>
                 <Link to={`${url}/founders/1`}>Equity</Link>
               </Menu.Item>
-              <Menu.Item key="transactions" icon={<UploadOutlined />}>
-                <Link to={`${url}/transactions/1`}>Transactions</Link>
-              </Menu.Item>
             </Menu>
           </Sider>
           <Layout>
@@ -115,9 +112,6 @@ class PrivateCompanyDashboard extends Component {
                     </Route>
                     <Route path={`${path}/founders/:founderAddress`}>
                       <div>Founder page</div>
-                    </Route>
-                    <Route path={`${path}/transactions/:transactionId`}>
-                      <div>Transaction page</div>
                     </Route>
                   </Switch>
                 </div>

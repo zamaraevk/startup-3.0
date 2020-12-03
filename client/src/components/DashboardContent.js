@@ -26,6 +26,12 @@ class DashboardContent extends Component {
       .getEquityHolderBalance(accounts[0])
       .call({ from: accounts[0] });
 
+    const txDetails = await companyContract.methods
+      .transactionCount()
+      .call({ from: accounts[0] });
+
+    console.log("======", txDetails);
+
     this.setState({
       roleCount,
       currentBalance: equityBalance.currentBalance,

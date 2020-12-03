@@ -53,6 +53,7 @@ contract PrivateCompany is ERC20Private {
     mapping(uint256 => Transaction) public transactions;
     mapping(uint256 => mapping(address => bool)) public confirmations;
     uint256 public transactionCount;
+    bool public vestingSchedule = false;
     bool public stopped = false;
 
     // Enums
@@ -82,6 +83,11 @@ contract PrivateCompany is ERC20Private {
     }
 
     // Modifiers
+    modifier onlyIfNotLaunched {
+        require(!vestingSchedule);
+        _;
+    }
+
     modifier stopInEmergency {
         require(!stopped);
         _;
@@ -346,7 +352,7 @@ contract PrivateCompany is ERC20Private {
      * @dev Sets equal amounts of equities for founders
      * with the vesting schedule (4 years duration)
      */
-    function _launchVestingSchedule() private onlyFounder {
+    function _launchVestingSchedule() private onlyFounder onlyIfNotLaunched {
         uint256 totalSupply = TOTAL_SUPPLY.mul(10**uint256(decimals()));
         uint256 founderDistributonSupply = totalSupply.mul(90).div(100); // 90% goes to initial founders / 10% to equity pool
         equityPool = totalSupply.sub(founderDistributonSupply);
@@ -367,6 +373,7 @@ contract PrivateCompany is ERC20Private {
                 TOKEN_VESTING_TIME
             );
         }
+        vestingSchedule = true;
     }
 
     /**
