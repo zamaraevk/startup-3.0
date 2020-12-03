@@ -51,7 +51,7 @@ contract PrivateCompany is ERC20Private {
     mapping(address => EquityHolder) equityHolders;
     mapping(uint256 => Transaction) public transactions;
     mapping(uint256 => mapping(address => bool)) public confirmations;
-    uint256 private transactionCount;
+    uint256 public transactionCount;
     bool public stopped = false;
 
     // Enums
@@ -76,6 +76,7 @@ contract PrivateCompany is ERC20Private {
         address destination;
         uint256 value;
         bytes data;
+        bool exist;
         bool executed;
     }
 
@@ -91,7 +92,10 @@ contract PrivateCompany is ERC20Private {
     }
 
     modifier transactionExists(uint256 transactionId) {
-        require(transactions[transactionId].destination != address(0));
+        require(
+            transactions[transactionId].exist,
+            "PrivateCompany: transaction does not exist"
+        );
         _;
     }
 
@@ -154,29 +158,6 @@ contract PrivateCompany is ERC20Private {
         emit LogContractResume();
     }
 
-    function getLastTransactionDetails(address holderAddress)
-        public
-        view
-        returns (
-            bool isConfirmedByMe,
-            bool isExecuted,
-            TransactionType txType
-        )
-    {
-        uint256 lastTxId = 0;
-
-        if (transactionCount > 0) {
-            lastTxId = transactionCount.sub(1);
-        }
-
-        Transaction memory lastTx = transactions[lastTxId];
-        isConfirmedByMe = confirmations[lastTxId][holderAddress];
-        isExecuted = lastTx.executed;
-        txType = lastTx.txType;
-
-        return (isConfirmedByMe, isExecuted, txType);
-    }
-
     function getTransactionTypes()
         public
         pure
@@ -198,6 +179,24 @@ contract PrivateCompany is ERC20Private {
             launchVestingScheduleType,
             destroyCompanyType
         );
+    }
+
+    function getTransactionDetails(uint256 transactionId)
+        public
+        view
+        transactionExists(transactionId)
+        returns (
+            bool isConfirmedByMe,
+            bool isExecuted,
+            TransactionType txType
+        )
+    {
+        Transaction memory txById = transactions[transactionId];
+        isConfirmedByMe = confirmations[transactionId][msg.sender];
+        isExecuted = txById.executed;
+        txType = txById.txType;
+
+        return (isConfirmedByMe, isExecuted, txType);
     }
 
     /**
@@ -287,7 +286,7 @@ contract PrivateCompany is ERC20Private {
         confirmed(transactionId)
         notExecuted(transactionId)
     {
-        if (isConfirmed(transactionId)) {
+        if (_isConfirmed(transactionId)) {
             Transaction storage txn = transactions[transactionId];
             txn.executed = true;
 
@@ -314,12 +313,13 @@ contract PrivateCompany is ERC20Private {
         }
     }
 
+    // Private functions
     /**
      * @dev Returns the confirmation status of a transaction.
      * @param transactionId Transaction ID.
      * @return Confirmation status.
      */
-    function isConfirmed(uint256 transactionId) public view returns (bool) {
+    function _isConfirmed(uint256 transactionId) private view returns (bool) {
         uint256 count = 0;
         for (uint256 i = 0; i < founders.length; i++) {
             if (confirmations[transactionId][founders[i]]) {
@@ -331,7 +331,6 @@ contract PrivateCompany is ERC20Private {
         }
     }
 
-    // Private functions
     function _launchVestingSchedule() private onlyFounder {
         uint256 totalSupply = TOTAL_SUPPLY.mul(10**uint256(decimals()));
         uint256 founderDistributonSupply = totalSupply.mul(90).div(100); // 90% goes to initial founders / 10% to equity pool
@@ -440,6 +439,7 @@ contract PrivateCompany is ERC20Private {
             destination: destination,
             value: value,
             data: data,
+            exist: true,
             executed: false
         });
         transactionCount += 1;
