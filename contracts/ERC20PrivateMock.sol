@@ -10,7 +10,7 @@ contract ERC20PrivateMock is ERC20Private {
         string memory _companyName,
         string memory _token,
         uint256 ownerBalance
-    ) public payable ERC20(_companyName, _token) ERC20Private() {
+    ) public payable ERC20(_companyName, _token) ERC20Private(msg.sender) {
         _mint(msg.sender, ownerBalance);
     }
 

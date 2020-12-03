@@ -1,10 +1,11 @@
 import React, { Component } from "react";
-import { Col, Row, Modal } from "antd";
+import { Col, Row } from "antd";
 
 import BalanceTile from "./DashboardTiles/BalanceTile";
 import FoundersTile from "./DashboardTiles/FoundersTile";
 import EquityTile from "./DashboardTiles/EquityTile";
 import TransactionsTile from "./DashboardTiles/TransactionsTile";
+import AddressModalForm from "./DashboardTiles/AddressModalForm";
 
 class DashboardContent extends Component {
   state = {
@@ -46,7 +47,17 @@ class DashboardContent extends Component {
     this.setState({ isModalVisible: true });
   };
 
-  handleOk = () => {
+  handleOk = async ({ address }) => {
+    const { accounts, companyContract } = this.props;
+    const founder = await companyContract.methods
+    .founders(0)
+    .call({ from: accounts[0] });
+
+    console.log("=====founder", founder);
+    await companyContract.methods
+      .submitTransaction("NewFounder", address, 0, "0x00")
+      .call({ from: accounts[0] });
+
     this.setState({ isModalVisible: false });
   };
 
@@ -89,14 +100,11 @@ class DashboardContent extends Component {
             <TransactionsTile transactions={transactions} />
           </Col>
         </Row>
-        <Modal
-          title="Add new founder"
+        <AddressModalForm
           visible={isModalVisible}
-          onOk={this.handleOk}
+          onCreate={this.handleOk}
           onCancel={this.handleCancel}
-        >
-          <p>Address...</p>
-        </Modal>
+        />
       </div>
     );
   }

@@ -12,9 +12,14 @@ contract("PrivateCompany", (accounts) => {
   const ticker = "CPC";
 
   beforeEach(async function () {
-    privateCompanyInstance = await PrivateCompany.new(companyName, ticker, {
-      from: founder,
-    });
+    privateCompanyInstance = await PrivateCompany.new(
+      companyName,
+      ticker,
+      founder,
+      {
+        from: founder,
+      }
+    );
 
     assert.ok(privateCompanyInstance);
   });

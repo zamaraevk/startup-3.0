@@ -142,14 +142,14 @@ contract PrivateCompany is ERC20Private {
      * assigning sender as first founder.
      * @param _companyName Company name.
      * @param _token Company(token) ticker name.
+     * @param _founder First founder -- contract creator.
      */
-    constructor(string memory _companyName, string memory _token)
-        public
-        payable
-        ERC20(_companyName, _token)
-        ERC20Private()
-    {
-        founders.push(msg.sender);
+    constructor(
+        string memory _companyName,
+        string memory _token,
+        address _founder
+    ) public payable ERC20(_companyName, _token) ERC20Private(_founder) {
+        founders.push(_founder);
     }
 
     /**

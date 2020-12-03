@@ -16,7 +16,7 @@ contract PrivateCompanyFactory is Factory {
         string memory _token
     ) public returns (address companyAddress) {
         companyAddress = address(
-            new PrivateCompany(_companyName, _token)
+            new PrivateCompany(_companyName, _token, msg.sender)
         );
         register(companyAddress);
         return companyAddress;

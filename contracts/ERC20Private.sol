@@ -25,9 +25,10 @@ abstract contract ERC20Private is ERC20, AccessControl {
     // Public functions
     /**
      * @dev Contract constructor sets initial owner and owner role as admin's role.
+     * @param _owner First owner -- contract creator.
      */
-    constructor() public {
-        _setupRole(OWNER_ROLE, msg.sender);
+    constructor(address _owner) public {
+        _setupRole(OWNER_ROLE, _owner);
         _setRoleAdmin(OWNER_ROLE, OWNER_ROLE);
     }
 
