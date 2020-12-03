@@ -6,9 +6,10 @@ import "./DateTimeLibrary.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 
 /**
- * @title Private Company contract with predefined founders,
- * simple vesting schedule and transaction agreement between all founders.
- * @dev Internal token(equity) can only circulate between founders.
+ * @title Private Company contract.
+ * @dev Transaction agreement before execution between all founders.
+ * @dev Simple vesting schedule of internal token.
+ * @dev Internal token(equity) protected. It can only circulate between founders.
  * @author Konstantin Zamaraev
  * @notice This final project for Consensys bootcamp. DO NOT USE IN PRODUCTION.
  */
@@ -131,8 +132,8 @@ contract PrivateCompany is ERC20Private {
 
     // Public functions
     /**
-     * @dev Contract constructor creates private token and sets equal amounts
-     * with the vesting schedule (4 years duration)
+     * @dev Contract constructor creates private token and
+     * assigning sender as first founder.
      * @param _companyName Company name.
      * @param _token Company(token) ticker name.
      */
@@ -158,9 +159,13 @@ contract PrivateCompany is ERC20Private {
         emit LogContractResume();
     }
 
+    /**
+     * @dev Return all transaction type strings
+     */
     function getTransactionTypes()
         public
-        pure
+        view
+        onlyFounder
         returns (
             string memory externalType,
             string memory newFounderType,
@@ -181,6 +186,10 @@ contract PrivateCompany is ERC20Private {
         );
     }
 
+    /**
+     * @param transactionId Transaction ID.
+     * @dev Transaction detals(type/confirmation status/execution status).
+     */
     function getTransactionDetails(uint256 transactionId)
         public
         view
@@ -218,6 +227,9 @@ contract PrivateCompany is ERC20Private {
         return (currentBalance, lockedBalance, totalBalance);
     }
 
+    /**
+     * @dev Allows a founder to check if there are tokens to release and mint.
+     */
     function releaseVestedEquity() public onlyFounder {
         uint256 unreleasedAmount = _releasableEquityAmount(msg.sender);
 
@@ -247,7 +259,6 @@ contract PrivateCompany is ERC20Private {
      * @param value Transaction ether value.
      * @param data Transaction data payload.
      */
-
     function submitTransaction(
         string memory txTypeKey,
         address destination,
@@ -331,6 +342,10 @@ contract PrivateCompany is ERC20Private {
         }
     }
 
+    /**
+     * @dev Sets equal amounts of equities for founders
+     * with the vesting schedule (4 years duration)
+     */
     function _launchVestingSchedule() private onlyFounder {
         uint256 totalSupply = TOTAL_SUPPLY.mul(10**uint256(decimals()));
         uint256 founderDistributonSupply = totalSupply.mul(90).div(100); // 90% goes to initial founders / 10% to equity pool
@@ -398,12 +413,11 @@ contract PrivateCompany is ERC20Private {
         return _vestedEquityAmount(holderAddress).sub(currentBalance);
     }
 
-    // Internal functions
     /**
      * @param holderAddress address of equity holder.
      */
     function _vestedEquityAmount(address holderAddress)
-        internal
+        private
         view
         returns (uint256)
     {
@@ -432,7 +446,7 @@ contract PrivateCompany is ERC20Private {
         address destination,
         uint256 value,
         bytes memory data
-    ) internal notNull(destination) returns (uint256 transactionId) {
+    ) private notNull(destination) returns (uint256 transactionId) {
         transactionId = transactionCount;
         transactions[transactionId] = Transaction({
             txType: txType,
@@ -454,7 +468,7 @@ contract PrivateCompany is ERC20Private {
         address destination,
         uint256 value,
         bytes memory data
-    ) internal returns (bool) {
+    ) private returns (bool) {
         bool result;
         assembly {
             result := call(
@@ -470,5 +484,3 @@ contract PrivateCompany is ERC20Private {
         return result;
     }
 }
-
-// "test","TST"
