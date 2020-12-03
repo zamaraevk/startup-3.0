@@ -2,14 +2,18 @@ import React from "react";
 import { Modal, Form, Input } from "antd";
 import { BlockOutlined } from "@ant-design/icons";
 
-const AddressModalForm = ({ visible, onCreate, onCancel }) => {
+const AddressModalForm = ({ visible, loading, onCreate, onCancel }) => {
   const [form] = Form.useForm();
+
   return (
     <Modal
       visible={visible}
       title="Add new founder"
       okText="Add"
       cancelText="Cancel"
+      okButtonProps={{
+        loading,
+      }}
       onCancel={onCancel}
       onOk={() => {
         form

@@ -15,6 +15,7 @@ class DashboardContent extends Component {
     transactionCount: 0,
     transactions: [],
     isModalVisible: false,
+    loading: false,
   };
 
   componentDidMount = async () => {
@@ -49,16 +50,15 @@ class DashboardContent extends Component {
 
   handleOk = async ({ address }) => {
     const { accounts, companyContract } = this.props;
-    const founder = await companyContract.methods
-    .founders(0)
-    .call({ from: accounts[0] });
 
-    console.log("=====founder", founder);
+    this.setState({ loading: true });
+
     await companyContract.methods
       .submitTransaction("NewFounder", address, 0, "0x00")
-      .call({ from: accounts[0] });
+      .send({ from: accounts[0] });
 
-    this.setState({ isModalVisible: false });
+    this.setState({ loading: false, isModalVisible: false });
+    window.location.reload();
   };
 
   handleCancel = () => {
@@ -72,9 +72,11 @@ class DashboardContent extends Component {
       lockedBalance,
       transactions,
       isModalVisible,
+      loading,
+      transactionCount
     } = this.state;
     const { balance, ticker } = this.props;
-
+    console.log("====", transactionCount)
     return (
       <div>
         <Row gutter={[16, 16]}>
@@ -101,6 +103,7 @@ class DashboardContent extends Component {
           </Col>
         </Row>
         <AddressModalForm
+          loading={loading}
           visible={isModalVisible}
           onCreate={this.handleOk}
           onCancel={this.handleCancel}
