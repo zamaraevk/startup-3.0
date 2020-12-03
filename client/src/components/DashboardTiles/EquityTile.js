@@ -8,7 +8,6 @@ const EquityTile = ({ ticker, currentBalance, lockedBalance }) => {
     <Card
       actions={[<div>Launch schedule</div>, <div>Release equity</div>]}
       bordered={false}
-      style={{ width: 300 }}
     >
       <Meta
         title={`${currentBalance}/${lockedBalance} ${ticker}`}

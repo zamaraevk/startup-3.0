@@ -3,11 +3,7 @@ import { Switch, Route, Link, withRouter } from "react-router-dom";
 import { Layout, Menu, Tag, Typography } from "antd";
 
 import PrivateCompanyContract from "../contracts/PrivateCompany.json";
-import {
-  UploadOutlined,
-  UserOutlined,
-  VideoCameraOutlined,
-} from "@ant-design/icons";
+import { HomeOutlined, StockOutlined } from "@ant-design/icons";
 
 import DashboardContent from "./DashboardContent";
 
@@ -83,10 +79,10 @@ class PrivateCompanyDashboard extends Component {
               <Tag color="#177ddc">{ticker}</Tag>
             </div>
             <Menu theme="dark" mode="inline" defaultSelectedKeys={["home"]}>
-              <Menu.Item key="home" icon={<UserOutlined />}>
+              <Menu.Item key="home" icon={<HomeOutlined />}>
                 <Link to={`${url}/home`}>Home</Link>
               </Menu.Item>
-              <Menu.Item key="founders" icon={<VideoCameraOutlined />}>
+              <Menu.Item key="founders" icon={<StockOutlined />}>
                 <Link to={`${url}/founders/1`}>Equity</Link>
               </Menu.Item>
             </Menu>

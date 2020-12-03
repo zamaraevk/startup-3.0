@@ -12,7 +12,6 @@ const BalanceTile = ({ balance }) => {
         <EyeOutlined key="eye" />,
       ]}
       bordered={false}
-      style={{ width: 300 }}
     >
       <Meta title={`${balance} ETH`} description="Wallet balance" />
     </Card>
