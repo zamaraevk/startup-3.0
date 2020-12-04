@@ -1,6 +1,10 @@
 import React from "react";
 import { Card, List, Button, Tag } from "antd";
-import { UserAddOutlined, CheckCircleOutlined } from "@ant-design/icons";
+import {
+  UserAddOutlined,
+  CheckCircleOutlined,
+  ClockCircleOutlined,
+} from "@ant-design/icons";
 
 const transactionMap = {
   0: "External",
@@ -9,20 +13,39 @@ const transactionMap = {
   3: "Destroy company contract",
 };
 
-const TransactionsTiles = ({ transactions }) => {
+const TransactionsTiles = ({ transactions, handleConfirmation, loading }) => {
+  const loadMore = (
+    <div
+      style={{
+        textAlign: "center",
+        marginTop: 12,
+        height: 32,
+        lineHeight: "32px",
+      }}
+    >
+      <Button>Load previous</Button>
+    </div>
+  );
+
   return (
     <Card bordered={false} style={{ width: "100%" }} title="Transactions">
       <List
-        // loading={initLoading}
         itemLayout="horizontal"
-        // loadMore={loadMore}
+        loadMore={loadMore}
         dataSource={transactions}
         renderItem={(tx) => {
           const isConfirmed = tx.isConfirmedByMe;
+          const isExecuted = tx.isExecuted;
+
           return (
             <List.Item
               actions={[
-                <Button type="primary" disabled={isConfirmed}>
+                <Button
+                  loading={loading}
+                  type="primary"
+                  disabled={isConfirmed || isExecuted}
+                  onClick={() => handleConfirmation(tx.txId)}
+                >
                   {isConfirmed ? "Confirmed" : "Confirm"}
                 </Button>,
               ]}
@@ -41,10 +64,16 @@ const TransactionsTiles = ({ transactions }) => {
                     </div>
                     <Tag
                       size="large"
-                      icon={<CheckCircleOutlined />}
-                      color="success"
+                      icon={
+                        isExecuted ? (
+                          <CheckCircleOutlined />
+                        ) : (
+                          <ClockCircleOutlined />
+                        )
+                      }
+                      color={isExecuted ? "success" : "processing"}
                     >
-                      success
+                      {isExecuted ? "Executed" : "Waiting for confirmations"}
                     </Tag>
                   </div>
                 }

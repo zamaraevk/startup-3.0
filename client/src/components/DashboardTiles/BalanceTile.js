@@ -13,7 +13,7 @@ const BalanceTile = ({ balance }) => {
       ]}
       bordered={false}
     >
-      <Meta title={`${balance} ETH`} description="Wallet balance" />
+      <Meta title={`${balance} ETH`} description="Company balance" />
     </Card>
   );
 };

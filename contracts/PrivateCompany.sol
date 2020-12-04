@@ -199,19 +199,22 @@ contract PrivateCompany is ERC20Private {
     function getTransactionDetails(uint256 transactionId)
         public
         view
+        onlyFounder
         transactionExists(transactionId)
         returns (
             bool isConfirmedByMe,
             bool isExecuted,
-            TransactionType txType
+            TransactionType txType,
+            uint256 txId
         )
     {
         Transaction memory txById = transactions[transactionId];
         isConfirmedByMe = confirmations[transactionId][msg.sender];
         isExecuted = txById.executed;
         txType = txById.txType;
+        txId = transactionId;
 
-        return (isConfirmedByMe, isExecuted, txType);
+        return (isConfirmedByMe, isExecuted, txType, txId);
     }
 
     /**

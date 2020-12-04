@@ -16,6 +16,7 @@ class PrivateCompanyDashboard extends Component {
     balance: null,
     ticker: null,
     companyContract: null,
+    notOwner: false,
   };
 
   componentDidMount = async () => {
@@ -29,22 +30,33 @@ class PrivateCompanyDashboard extends Component {
           from: accounts[0],
         }
       );
-      const companyName = await instance.methods
-        .name()
+
+      const isOwner = await instance.methods
+        .isOwner(accounts[0])
         .call({ from: accounts[0] });
 
-      const ticker = await instance.methods
-        .symbol()
-        .call({ from: accounts[0] });
+      if (isOwner) {
+        const companyName = await instance.methods
+          .name()
+          .call({ from: accounts[0] });
 
-      const balance = await web3.eth.getBalance(address);
+        const ticker = await instance.methods
+          .symbol()
+          .call({ from: accounts[0] });
 
-      this.setState({
-        balance,
-        companyContract: instance,
-        companyName,
-        ticker,
-      });
+        const balance = await web3.eth.getBalance(address);
+
+        this.setState({
+          balance,
+          companyContract: instance,
+          companyName,
+          ticker,
+        });
+      } else {
+        this.setState({
+          notOwner: true,
+        });
+      }
     } catch (error) {
       console.log("errrrr", error);
     }

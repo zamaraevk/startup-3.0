@@ -15,7 +15,7 @@ class DashboardContent extends Component {
     transactionCount: null,
     transactions: [],
     isModalVisible: false,
-    loading: false,
+    loading: null, // ["founder", "confirm", "schedule"]
   };
 
   componentDidMount = async () => {
@@ -38,16 +38,22 @@ class DashboardContent extends Component {
       .transactionCount()
       .call({ from: accounts[0] });
 
-    const lastTransaction = await companyContract.methods
-      .getTransactionDetails(0)
-      .call({ from: accounts[0] });
+    let lastTransaction;
+    let transactionsUpdated = transactions;
+
+    if (transactionCount > 0) {
+      lastTransaction = await companyContract.methods
+        .getTransactionDetails(transactionCount - 1)
+        .call({ from: accounts[0] });
+      transactionsUpdated = [...transactions, lastTransaction];
+    }
 
     this.setState({
       roleCount,
       transactionCount,
       currentBalance: equityBalance.currentBalance,
       lockedBalance: equityBalance.lockedBalance,
-      transactions: [...transactions, lastTransaction],
+      transactions: transactionsUpdated,
     });
   };
 
@@ -58,18 +64,29 @@ class DashboardContent extends Component {
   handleOk = async ({ address }) => {
     const { accounts, companyContract } = this.props;
 
-    this.setState({ loading: true });
-
+    this.setState({ loading: "founder" });
     await companyContract.methods
       .submitTransaction("NewFounder", address, 0, "0x00")
       .send({ from: accounts[0] });
 
-    this.setState({ loading: false, isModalVisible: false });
+    this.setState({ loading: null, isModalVisible: false });
     window.location.reload();
   };
 
   handleCancel = () => {
     this.setState({ isModalVisible: false });
+  };
+
+  confirmTransaction = async (transctionId) => {
+    const { accounts, companyContract } = this.props;
+
+    this.setState({ loading: "confirm" });
+    await companyContract.methods
+      .confirmTransaction(transctionId)
+      .send({ from: accounts[0] });
+
+    this.setState({ loading: null });
+    window.location.reload();
   };
 
   render() {
@@ -105,11 +122,15 @@ class DashboardContent extends Component {
         </Row>
         <Row gutter={[16, 16]}>
           <Col span={24}>
-            <TransactionsTile transactions={transactions} />
+            <TransactionsTile
+              loading={loading === "confirm"}
+              transactions={transactions}
+              handleConfirmation={this.confirmTransaction}
+            />
           </Col>
         </Row>
         <AddressModalForm
-          loading={loading}
+          loading={loading === "founder"}
           visible={isModalVisible}
           onCreate={this.handleOk}
           onCancel={this.handleCancel}
