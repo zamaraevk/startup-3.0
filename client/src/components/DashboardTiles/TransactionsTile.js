@@ -13,7 +13,13 @@ const transactionMap = {
   3: "Destroy company contract",
 };
 
-const TransactionsTiles = ({ transactions, handleConfirmation, loading }) => {
+const TransactionsTiles = ({
+  transactions,
+  prevTransactionId,
+  handleConfirmation,
+  loadTransaction,
+  loading,
+}) => {
   const loadMore = (
     <div
       style={{
@@ -23,7 +29,9 @@ const TransactionsTiles = ({ transactions, handleConfirmation, loading }) => {
         lineHeight: "32px",
       }}
     >
-      <Button>Load previous</Button>
+      <Button onClick={() => loadTransaction(prevTransactionId)}>
+        Load previous
+      </Button>
     </div>
   );
 
@@ -31,7 +39,7 @@ const TransactionsTiles = ({ transactions, handleConfirmation, loading }) => {
     <Card bordered={false} style={{ width: "100%" }} title="Transactions">
       <List
         itemLayout="horizontal"
-        loadMore={loadMore}
+        loadMore={prevTransactionId && loadMore}
         dataSource={transactions}
         renderItem={(tx) => {
           const isConfirmed = tx.isConfirmedByMe;

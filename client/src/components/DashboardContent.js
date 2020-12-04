@@ -89,9 +89,22 @@ class DashboardContent extends Component {
     window.location.reload();
   };
 
+  loadTransaction = async (transctionId) => {
+    const { transactions } = this.state;
+    const { accounts, companyContract } = this.props;
+
+    const tx = await companyContract.methods
+      .getTransactionDetails(transctionId)
+      .call({ from: accounts[0] });
+
+    const transactionsUpdated = [...transactions, tx];
+    this.setState({ transactions: transactionsUpdated });
+  };
+
   render() {
     const {
       roleCount,
+      transactionCount,
       currentBalance,
       lockedBalance,
       transactions,
@@ -99,6 +112,8 @@ class DashboardContent extends Component {
       loading,
     } = this.state;
     const { balance, ticker } = this.props;
+
+    const prevTransactionId = transactionCount - transactions.length;
 
     return (
       <div>
@@ -126,6 +141,10 @@ class DashboardContent extends Component {
               loading={loading === "confirm"}
               transactions={transactions}
               handleConfirmation={this.confirmTransaction}
+              prevTransactionId={
+                prevTransactionId > 0 ? prevTransactionId : null
+              }
+              loadTransaction={this.loadTransaction}
             />
           </Col>
         </Row>
