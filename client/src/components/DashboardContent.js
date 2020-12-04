@@ -16,6 +16,7 @@ class DashboardContent extends Component {
     transactions: [],
     isModalVisible: false,
     loading: null, // ["founder", "confirm", "schedule"]
+    isScheduleLaunched: false,
   };
 
   componentDidMount = async () => {
@@ -38,6 +39,10 @@ class DashboardContent extends Component {
       .transactionCount()
       .call({ from: accounts[0] });
 
+    const isScheduleLaunched = await companyContract.methods
+      .vestingSchedule()
+      .call({ from: accounts[0] });
+
     let lastTransaction;
     let transactionsUpdated = transactions;
 
@@ -54,6 +59,7 @@ class DashboardContent extends Component {
       currentBalance: equityBalance.currentBalance,
       lockedBalance: equityBalance.lockedBalance,
       transactions: transactionsUpdated,
+      isScheduleLaunched,
     });
   };
 
@@ -75,6 +81,17 @@ class DashboardContent extends Component {
 
   handleCancel = () => {
     this.setState({ isModalVisible: false });
+  };
+
+  launchVestingSchedule = async () => {
+    const { accounts, companyContract } = this.props;
+
+    this.setState({ loading: "schedule" });
+    await companyContract.methods
+      .submitTransaction("LaunchVestingSchedule", accounts[0], 0, "0x00")
+      .send({ from: accounts[0] });
+
+    window.location.reload();
   };
 
   confirmTransaction = async (transctionId) => {
@@ -108,12 +125,13 @@ class DashboardContent extends Component {
       currentBalance,
       lockedBalance,
       transactions,
+      isScheduleLaunched,
       isModalVisible,
       loading,
     } = this.state;
     const { balance, ticker } = this.props;
 
-    const prevTransactionId = transactionCount - transactions.length;
+    const prevTransactionId = transactionCount - transactions.length - 1;
 
     return (
       <div>
@@ -130,8 +148,11 @@ class DashboardContent extends Component {
           <Col span={8}>
             <EquityTile
               ticker={ticker}
+              loading={loading === "schedule"}
               currentBalance={currentBalance}
               lockedBalance={lockedBalance}
+              isScheduleLaunched={isScheduleLaunched}
+              handleLaunchVestingSchedule={this.launchVestingSchedule}
             />
           </Col>
         </Row>
@@ -142,7 +163,7 @@ class DashboardContent extends Component {
               transactions={transactions}
               handleConfirmation={this.confirmTransaction}
               prevTransactionId={
-                prevTransactionId > 0 ? prevTransactionId : null
+                prevTransactionId >= 0 ? prevTransactionId : null
               }
               loadTransaction={this.loadTransaction}
             />

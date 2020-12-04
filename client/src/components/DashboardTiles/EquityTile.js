@@ -3,10 +3,26 @@ import { Card } from "antd";
 
 const { Meta } = Card;
 
-const EquityTile = ({ ticker, currentBalance, lockedBalance }) => {
+const EquityTile = ({
+  isScheduleLaunched,
+  ticker,
+  loading,
+  currentBalance,
+  lockedBalance,
+  handleLaunchVestingSchedule,
+}) => {
   return (
     <Card
-      actions={[<div>Launch schedule</div>, <div>Release equity</div>]}
+      actions={
+        !isScheduleLaunched
+          ? [
+              <div onClick={() => handleLaunchVestingSchedule()}>
+                {loading ? "Launching..." : "Launch schedule"}
+              </div>,
+              <div>Release equity</div>,
+            ]
+          : [<div>Release equity</div>]
+      }
       bordered={false}
     >
       <Meta
