@@ -53,7 +53,7 @@ const TransactionsTiles = ({
             <List.Item
               actions={[
                 <Button
-                  loading={loading}
+                  loading={loading === "confirm"}
                   type="primary"
                   disabled={isConfirmed || isExecuted}
                   onClick={() => handleConfirmation(tx.txId)}

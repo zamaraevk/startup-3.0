@@ -5,7 +5,8 @@ import { Layout, Menu, Tag, Typography } from "antd";
 import PrivateCompanyContract from "../contracts/PrivateCompany.json";
 import { HomeOutlined, StockOutlined } from "@ant-design/icons";
 
-import DashboardContent from "./DashboardContent";
+import DashboardHome from "./DashboardHome";
+import DashboardFounder from "./DashboardFounder";
 
 const { Content, Sider } = Layout;
 const { Text } = Typography;
@@ -95,7 +96,7 @@ class PrivateCompanyDashboard extends Component {
                 <Link to={`${url}/home`}>Home</Link>
               </Menu.Item>
               <Menu.Item key="founders" icon={<StockOutlined />}>
-                <Link to={`${url}/founders/1`}>Equity</Link>
+                <Link to={`${url}/founder`}>Founder</Link>
               </Menu.Item>
             </Menu>
           </Sider>
@@ -111,7 +112,7 @@ class PrivateCompanyDashboard extends Component {
                 >
                   <Switch>
                     <Route path={`${path}/home`}>
-                      <DashboardContent
+                      <DashboardHome
                         web3={web3}
                         ticker={ticker}
                         accounts={accounts}
@@ -119,8 +120,14 @@ class PrivateCompanyDashboard extends Component {
                         companyContract={companyContract}
                       />
                     </Route>
-                    <Route path={`${path}/founders/:founderAddress`}>
-                      <div>Founder page</div>
+                    <Route path={`${path}/founder`}>
+                      <DashboardFounder
+                        web3={web3}
+                        ticker={ticker}
+                        accounts={accounts}
+                        balance={balance}
+                        companyContract={companyContract}
+                      />
                     </Route>
                   </Switch>
                 </div>

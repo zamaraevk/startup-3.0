@@ -3,7 +3,7 @@ import { Col, Row } from "antd";
 
 import BalanceTile from "./DashboardTiles/BalanceTile";
 import FoundersTile from "./DashboardTiles/FoundersTile";
-import EquityTile from "./DashboardTiles/EquityTile";
+import EquityPoolTile from "./DashboardTiles/EquityPoolTile";
 import TransactionsTile from "./DashboardTiles/TransactionsTile";
 import AddressModalForm from "./DashboardTiles/AddressModalForm";
 
@@ -146,7 +146,7 @@ class DashboardContent extends Component {
             />
           </Col>
           <Col span={8}>
-            <EquityTile
+            <EquityPoolTile
               ticker={ticker}
               loading={loading === "schedule"}
               currentBalance={currentBalance}

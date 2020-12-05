@@ -19,7 +19,7 @@ contract PrivateCompany is ERC20Private {
     using BokkyPooBahsDateTimeLibrary for uint256;
 
     // Constants
-    uint256 internal constant TOTAL_SUPPLY = 10000;
+    uint256 public constant TOTAL_SUPPLY = 10000;
     uint256 internal constant TOKEN_VESTING_TIME = 4; // 4 years for the full vesting
 
     // Events
@@ -47,7 +47,7 @@ contract PrivateCompany is ERC20Private {
     event LogContractResume();
 
     // Storage
-    uint256 private equityPool;
+    uint256 public equityPool;
     address[] public founders;
     mapping(address => EquityHolder) equityHolders;
     mapping(uint256 => Transaction) public transactions;
