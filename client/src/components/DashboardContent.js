@@ -21,7 +21,7 @@ class DashboardContent extends Component {
 
   componentDidMount = async () => {
     const { transactions } = this.state;
-    const { accounts, companyContract } = this.props;
+    const { accounts, companyContract, web3 } = this.props;
 
     const ownerRole = await companyContract.methods
       .OWNER_ROLE()
@@ -56,8 +56,8 @@ class DashboardContent extends Component {
     this.setState({
       roleCount,
       transactionCount,
-      currentBalance: equityBalance.currentBalance,
-      lockedBalance: equityBalance.lockedBalance,
+      currentBalance: web3.utils.fromWei(equityBalance.currentBalance),
+      lockedBalance: web3.utils.fromWei(equityBalance.lockedBalance),
       transactions: transactionsUpdated,
       isScheduleLaunched,
     });
@@ -162,9 +162,7 @@ class DashboardContent extends Component {
               loading={loading === "confirm"}
               transactions={transactions}
               handleConfirmation={this.confirmTransaction}
-              prevTransactionId={
-                prevTransactionId >= 0 ? prevTransactionId : null
-              }
+              prevTransactionId={prevTransactionId}
               loadTransaction={this.loadTransaction}
             />
           </Col>

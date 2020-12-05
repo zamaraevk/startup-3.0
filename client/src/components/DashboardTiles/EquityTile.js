@@ -17,7 +17,7 @@ const EquityTile = ({
         !isScheduleLaunched
           ? [
               <div onClick={() => handleLaunchVestingSchedule()}>
-                {loading ? "Launching..." : "Launch schedule"}
+                {loading ? "Submitting..." : "Launch schedule"}
               </div>,
               <div>Release equity</div>,
             ]

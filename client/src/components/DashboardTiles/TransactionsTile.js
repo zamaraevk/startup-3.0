@@ -20,26 +20,30 @@ const TransactionsTiles = ({
   loadTransaction,
   loading,
 }) => {
-  const loadMore = (
-    <div
-      style={{
-        textAlign: "center",
-        marginTop: 12,
-        height: 32,
-        lineHeight: "32px",
-      }}
-    >
-      <Button onClick={() => loadTransaction(prevTransactionId)}>
-        Load previous
-      </Button>
-    </div>
-  );
+  const LoadMore = ({ prevTransactionId }) => {
+    return (
+      prevTransactionId > -1 && (
+        <div
+          style={{
+            textAlign: "center",
+            marginTop: 12,
+            height: 32,
+            lineHeight: "32px",
+          }}
+        >
+          <Button onClick={() => loadTransaction(prevTransactionId)}>
+            Load previous
+          </Button>
+        </div>
+      )
+    );
+  };
 
   return (
     <Card bordered={false} style={{ width: "100%" }} title="Transactions">
       <List
         itemLayout="horizontal"
-        loadMore={prevTransactionId && loadMore}
+        loadMore={<LoadMore prevTransactionId={prevTransactionId} />}
         dataSource={transactions}
         renderItem={(tx) => {
           const isConfirmed = tx.isConfirmedByMe;

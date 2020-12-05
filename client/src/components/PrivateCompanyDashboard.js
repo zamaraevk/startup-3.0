@@ -47,7 +47,7 @@ class PrivateCompanyDashboard extends Component {
         const balance = await web3.eth.getBalance(address);
 
         this.setState({
-          balance,
+          balance: web3.utils.fromWei(balance),
           companyContract: instance,
           companyName,
           ticker,
@@ -64,7 +64,7 @@ class PrivateCompanyDashboard extends Component {
 
   render() {
     const { balance, companyContract, companyName, ticker } = this.state;
-    const { accounts, match } = this.props;
+    const { accounts, match, web3 } = this.props;
     const { path, url } = match;
 
     return (
@@ -112,6 +112,7 @@ class PrivateCompanyDashboard extends Component {
                   <Switch>
                     <Route path={`${path}/home`}>
                       <DashboardContent
+                        web3={web3}
                         ticker={ticker}
                         accounts={accounts}
                         balance={balance}
