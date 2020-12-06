@@ -1,6 +1,7 @@
 import React, { useState } from "react";
+import { Link, withRouter } from "react-router-dom";
 import { PieChart, Pie, Sector, Cell } from "recharts";
-import { Card, Button } from "antd";
+import { Card, Button, Result } from "antd";
 
 const { Meta } = Card;
 
@@ -84,59 +85,92 @@ const EquityTile = ({
   loading,
   currentBalance,
   lockedBalance,
-  handleLaunchVestingSchedule,
+  lockTimeStart,
+  handleReleaseEquity,
+  match,
 }) => {
   const [activeIndex, setActiveIndex] = useState(0);
   const COLORS = ["#00C49F", "#FFBB28"];
   const data = [
     {
       name: "Current balance",
-      value: Number(1000),
+      value: Number(currentBalance),
     },
     {
       name: "Locked balance",
       value: Number(lockedBalance),
     },
   ];
-
+  const launchDate = new Date(lockTimeStart * 1000).toLocaleString();
   return (
     <Card
       title="Equity balance"
-      extra={<Button type="primary">Release equity</Button>}
+      extra={
+        <Button
+          loading={loading === "schedule"}
+          type="primary"
+          disabled={!isScheduleLaunched}
+          onClick={handleReleaseEquity}
+        >
+          Release equity
+        </Button>
+      }
       bordered={false}
-      style={{
-        height: "80vh",
-      }}
     >
-      <Meta title="Vesting schedule started" description="Time: XXXXX" />
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          width: "100%",
-        }}
-      >
-        <PieChart width={520} height={400}>
-          <Pie
-            activeIndex={activeIndex}
-            activeShape={<ActiveShape ticker={ticker} />}
-            data={data}
-            cx="50%"
-            cy="50%"
-            innerRadius={80}
-            outerRadius={100}
-            fill="yellow"
-            stroke="rgb(20, 20, 20)"
-            onMouseEnter={(data, index) => setActiveIndex(index)}
+      {isScheduleLaunched ? (
+        <div>
+          {lockTimeStart && (
+            <Meta
+              title="Vesting schedule"
+              description={
+                <div>
+                  <div>{`Started: ${launchDate}`}</div>
+                  <div>Duration: 4 years</div>
+                </div>
+              }
+            />
+          )}
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              width: "100%",
+            }}
           >
-            {data.map((entry, index) => (
-              <Cell key={index} fill={COLORS[index % COLORS.length]} />
-            ))}
-          </Pie>
-        </PieChart>
-      </div>
+            <PieChart width={740} height={400}>
+              <Pie
+                activeIndex={activeIndex}
+                activeShape={<ActiveShape ticker={ticker} />}
+                data={data}
+                cx="50%"
+                cy="50%"
+                innerRadius={80}
+                outerRadius={100}
+                fill="yellow"
+                stroke="rgb(20, 20, 20)"
+                onMouseEnter={(data, index) => setActiveIndex(index)}
+              >
+                {data.map((entry, index) => (
+                  <Cell key={index} fill={COLORS[index % COLORS.length]} />
+                ))}
+              </Pie>
+            </PieChart>
+          </div>
+        </div>
+      ) : (
+        <Result
+          title="To view equity chart founders have to launch vesting schedule."
+          extra={
+            <Link to={`/company/${match.params.address}/home`}>
+              <Button type="primary" key="console">
+                Home
+              </Button>
+            </Link>
+          }
+        />
+      )}
     </Card>
   );
 };
 
-export default EquityTile;
+export default withRouter(EquityTile);

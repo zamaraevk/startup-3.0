@@ -65,9 +65,10 @@ class PrivateCompanyDashboard extends Component {
 
   render() {
     const { balance, companyContract, companyName, ticker } = this.state;
-    const { accounts, match, web3 } = this.props;
+    const { accounts, match, web3, location } = this.props;
     const { path, url } = match;
 
+    const currentPage = location.pathname.match(/(home|founder)/)[0];
     return (
       <div>
         <Layout>
@@ -91,11 +92,15 @@ class PrivateCompanyDashboard extends Component {
               </Text>
               <Tag color="#177ddc">{ticker}</Tag>
             </div>
-            <Menu theme="dark" mode="inline" defaultSelectedKeys={["home"]}>
+            <Menu
+              theme="dark"
+              mode="inline"
+              defaultSelectedKeys={[currentPage]}
+            >
               <Menu.Item key="home" icon={<HomeOutlined />}>
                 <Link to={`${url}/home`}>Home</Link>
               </Menu.Item>
-              <Menu.Item key="founders" icon={<StockOutlined />}>
+              <Menu.Item key="founder" icon={<StockOutlined />}>
                 <Link to={`${url}/founder`}>Founder</Link>
               </Menu.Item>
             </Menu>

@@ -205,16 +205,20 @@ contract PrivateCompany is ERC20Private {
             bool isConfirmedByMe,
             bool isExecuted,
             TransactionType txType,
-            uint256 txId
+            uint256 txId,
+            address destination,
+            uint256 value
         )
     {
         Transaction memory txById = transactions[transactionId];
         isConfirmedByMe = confirmations[transactionId][msg.sender];
         isExecuted = txById.executed;
         txType = txById.txType;
+        destination = txById.destination;
+        value = txById.value;
         txId = transactionId;
 
-        return (isConfirmedByMe, isExecuted, txType, txId);
+        return (isConfirmedByMe, isExecuted, txType, txId, destination, value);
     }
 
     /**
@@ -226,14 +230,16 @@ contract PrivateCompany is ERC20Private {
         returns (
             uint256 currentBalance,
             uint256 lockedBalance,
-            uint256 totalBalance
+            uint256 totalBalance,
+            uint256 lockTimeStart
         )
     {
         currentBalance = equityHolders[holderAddress].currentBalance;
         lockedBalance = equityHolders[holderAddress].lockedBalance;
         totalBalance = equityHolders[holderAddress].totalBalance;
+        lockTimeStart = equityHolders[holderAddress].lockTimeStart;
 
-        return (currentBalance, lockedBalance, totalBalance);
+        return (currentBalance, lockedBalance, totalBalance, lockTimeStart);
     }
 
     /**

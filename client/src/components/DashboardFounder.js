@@ -1,13 +1,13 @@
 import React, { Component } from "react";
-import { Col, Row } from "antd";
+import { Button, Col, Row, Result } from "antd";
 
-import FounderBalanceTile from "./DashboardTiles/FounderBalanceTile";
 import EquityTile from "./DashboardTiles/EquityTile";
 
 class DashboardContent extends Component {
   state = {
     currentBalance: "0",
     lockedBalance: "0",
+    lockTimeStart: null,
     isModalVisible: false,
     loading: null, // ["founder", "confirm", "schedule"]
     isScheduleLaunched: false,
@@ -27,6 +27,7 @@ class DashboardContent extends Component {
     this.setState({
       currentBalance: web3.utils.fromWei(equityBalance.currentBalance),
       lockedBalance: web3.utils.fromWei(equityBalance.lockedBalance),
+      lockTimeStart: equityBalance.lockTimeStart,
       isScheduleLaunched,
     });
   };
@@ -51,10 +52,23 @@ class DashboardContent extends Component {
     this.setState({ isModalVisible: false });
   };
 
+  releaseEquity = async () => {
+    const { accounts, companyContract } = this.props;
+
+    this.setState({ loading: "schedule" });
+    await companyContract.methods
+      .releaseVestedEquity()
+      .send({ from: accounts[0] });
+
+    this.setState({ loading: null });
+    window.location.reload();
+  };
+
   render() {
     const {
       currentBalance,
       lockedBalance,
+      lockTimeStart,
       isScheduleLaunched,
       loading,
     } = this.state;
@@ -66,11 +80,12 @@ class DashboardContent extends Component {
           <Col span={24}>
             <EquityTile
               ticker={ticker}
-              loading={loading === "schedule"}
+              loading={loading}
               currentBalance={currentBalance}
               lockedBalance={lockedBalance}
+              lockTimeStart={lockTimeStart}
               isScheduleLaunched={isScheduleLaunched}
-              handleLaunchVestingSchedule={this.launchVestingSchedule}
+              handleReleaseEquity={this.releaseEquity}
             />
           </Col>
         </Row>
