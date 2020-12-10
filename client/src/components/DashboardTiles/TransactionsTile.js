@@ -48,12 +48,11 @@ const TransactionsTiles = ({
         renderItem={(tx) => {
           const isConfirmed = tx.isConfirmedByMe;
           const isExecuted = tx.isExecuted;
-
           return (
             <List.Item
               actions={[
                 <Button
-                  loading={loading === "confirm"}
+                  loading={loading === `confirm-${tx.txId}`}
                   type="primary"
                   disabled={isConfirmed || isExecuted}
                   onClick={() => handleConfirmation(tx.txId)}

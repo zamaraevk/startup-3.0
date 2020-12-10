@@ -1,9 +1,9 @@
 import React, { Component } from "react";
-import { Button, Col, Row, Result } from "antd";
+import { Col, Row } from "antd";
 
 import EquityTile from "./DashboardTiles/EquityTile";
 
-class DashboardContent extends Component {
+class DashboardFounder extends Component {
   state = {
     currentBalance: "0",
     lockedBalance: "0",
@@ -72,7 +72,7 @@ class DashboardContent extends Component {
       isScheduleLaunched,
       loading,
     } = this.state;
-    const { balance, ticker } = this.props;
+    const { ticker } = this.props;
 
     return (
       <div>
@@ -94,4 +94,4 @@ class DashboardContent extends Component {
   }
 }
 
-export default DashboardContent;
+export default DashboardFounder;

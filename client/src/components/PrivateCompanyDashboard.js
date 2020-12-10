@@ -3,12 +3,19 @@ import { Switch, Route, Link, withRouter } from "react-router-dom";
 import { Layout, Menu, Tag, Typography } from "antd";
 
 import PrivateCompanyContract from "../contracts/PrivateCompany.json";
-import { HomeOutlined, StockOutlined } from "@ant-design/icons";
+import {
+  HomeOutlined,
+  StockOutlined,
+  PaperClipOutlined,
+} from "@ant-design/icons";
 
 import DashboardHome from "./DashboardHome";
 import DashboardFounder from "./DashboardFounder";
+import DashboardContract from "./DashboardContract";
 
-const { Content, Sider } = Layout;
+import "./Pulse.css";
+
+const { Content, Sider, Footer } = Layout;
 const { Text } = Typography;
 
 class PrivateCompanyDashboard extends Component {
@@ -18,6 +25,7 @@ class PrivateCompanyDashboard extends Component {
     ticker: null,
     companyContract: null,
     notOwner: false,
+    isContractStopped: false,
   };
 
   componentDidMount = async () => {
@@ -45,9 +53,14 @@ class PrivateCompanyDashboard extends Component {
           .symbol()
           .call({ from: accounts[0] });
 
+        const isContractStopped = await instance.methods
+          .stopped()
+          .call({ from: accounts[0] });
+
         const balance = await web3.eth.getBalance(address);
 
         this.setState({
+          isContractStopped,
           balance: web3.utils.fromWei(balance),
           companyContract: instance,
           companyName,
@@ -64,11 +77,17 @@ class PrivateCompanyDashboard extends Component {
   };
 
   render() {
-    const { balance, companyContract, companyName, ticker } = this.state;
+    const {
+      balance,
+      companyContract,
+      companyName,
+      ticker,
+      isContractStopped,
+    } = this.state;
     const { accounts, match, web3, location } = this.props;
     const { path, url } = match;
+    const currentPage = location.pathname.match(/(home|founder|contract)/)[0];
 
-    const currentPage = location.pathname.match(/(home|founder)/)[0];
     return (
       <div>
         <Layout>
@@ -103,6 +122,9 @@ class PrivateCompanyDashboard extends Component {
               <Menu.Item key="founder" icon={<StockOutlined />}>
                 <Link to={`${url}/founder`}>Founder</Link>
               </Menu.Item>
+              <Menu.Item key="contract" icon={<PaperClipOutlined />}>
+                <Link to={`${url}/contract`}>Contract</Link>
+              </Menu.Item>
             </Menu>
           </Sider>
           <Layout>
@@ -134,10 +156,39 @@ class PrivateCompanyDashboard extends Component {
                         companyContract={companyContract}
                       />
                     </Route>
+                    <Route path={`${path}/contract`}>
+                      <DashboardContract
+                        web3={web3}
+                        ticker={ticker}
+                        accounts={accounts}
+                        balance={balance}
+                        companyContract={companyContract}
+                        isContractStopped={isContractStopped}
+                      />
+                    </Route>
                   </Switch>
                 </div>
               </Content>
             )}
+            <Footer
+              style={{
+                display: "flex",
+                justifyContent: "flex-end",
+                alignItems: "center",
+                paddingRight: 40,
+              }}
+            >
+              <div
+                className={`pulse ${isContractStopped ? "red" : "green"}`}
+              ></div>
+              <div
+                style={{
+                  color: isContractStopped ? "red" : "green",
+                }}
+              >
+                {isContractStopped ? "contract stopped" : "contract live"}
+              </div>
+            </Footer>
           </Layout>
         </Layout>
       </div>

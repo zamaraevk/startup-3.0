@@ -92,7 +92,7 @@ class DashboardContent extends Component {
   handleExternalOk = async ({ address, amount }) => {
     const { accounts, companyContract, web3 } = this.props;
     const weiAmount = web3.utils.toWei(amount);
-    
+
     this.setState({ loading: "external" });
     await companyContract.methods
       .submitTransaction("External", address, weiAmount, "0x00")
@@ -124,7 +124,7 @@ class DashboardContent extends Component {
   confirmTransaction = async (transctionId) => {
     const { accounts, companyContract } = this.props;
 
-    this.setState({ loading: "confirm" });
+    this.setState({ loading: `confirm-${transctionId}` });
     await companyContract.methods
       .confirmTransaction(transctionId)
       .send({ from: accounts[0] });
@@ -160,7 +160,6 @@ class DashboardContent extends Component {
     const { balance, ticker } = this.props;
 
     const prevTransactionId = transactionCount - transactions.length - 1;
-
     return (
       <div>
         <Row gutter={[16, 16]}>
@@ -187,7 +186,7 @@ class DashboardContent extends Component {
         <Row gutter={[16, 16]}>
           <Col span={24}>
             <TransactionsTile
-              loading={loading === "confirm"}
+              loading={loading}
               transactions={transactions}
               handleConfirmation={this.confirmTransaction}
               prevTransactionId={prevTransactionId}

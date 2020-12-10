@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { Link, withRouter } from "react-router-dom";
 import { PieChart, Pie, Sector, Cell } from "recharts";
 import { Card, Button, Result } from "antd";
 
@@ -87,7 +86,6 @@ const EquityTile = ({
   lockedBalance,
   lockTimeStart,
   handleReleaseEquity,
-  match,
 }) => {
   const [activeIndex, setActiveIndex] = useState(0);
   const COLORS = ["#00C49F", "#FFBB28"];
@@ -137,7 +135,7 @@ const EquityTile = ({
               width: "100%",
             }}
           >
-            <PieChart width={740} height={400}>
+            <PieChart width={740} height={375}>
               <Pie
                 activeIndex={activeIndex}
                 activeShape={<ActiveShape ticker={ticker} />}
@@ -158,19 +156,10 @@ const EquityTile = ({
           </div>
         </div>
       ) : (
-        <Result
-          title="To view equity chart founders have to launch vesting schedule."
-          extra={
-            <Link to={`/company/${match.params.address}/home`}>
-              <Button type="primary" key="console">
-                Home
-              </Button>
-            </Link>
-          }
-        />
+        <Result title="To view equity chart, founders have to launch vesting schedule." />
       )}
     </Card>
   );
 };
 
-export default withRouter(EquityTile);
+export default EquityTile;
