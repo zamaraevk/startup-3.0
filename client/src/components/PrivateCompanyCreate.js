@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useHistory } from "react-router-dom";
-import { Card, Form, Input, Button, Spin } from "antd";
+import { Card, Form, Input, Button, Spin, Image } from "antd";
+import CompanyImage from "../assets/company.svg";
 
 const PrivateCompanyCreate = ({ accounts, contract }) => {
   const [loading, setLoading] = useState(false);
@@ -29,52 +30,64 @@ const PrivateCompanyCreate = ({ accounts, contract }) => {
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
+        width: "100%",
         height: "100vh",
       }}
     >
       {loading ? (
-        <Spin size="large" tip="Creating your private company..."/>
+        <Spin size="large" tip="Creating your private company..." />
       ) : (
-        <Card
-          title="Create your private company"
-          style={{ width: 500, alignSelf: "center" }}
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-around",
+            alignItems: "center",
+            width: "100%",
+          }}
         >
-          <Form name="basic" layout="vertical" onFinish={onFinish}>
-            <Form.Item
-              name="company_name"
-              style={{
-                paddingBottom: 5,
-              }}
-              rules={[
-                {
-                  required: true,
-                  message: "Please input your company name.",
-                },
-              ]}
-            >
-              <Input placeholder="Company name" size="large" />
-            </Form.Item>
-            <Form.Item
-              name="ticker"
-              style={{
-                paddingBottom: 5,
-              }}
-              rules={[
-                {
-                  required: true,
-                  message: "Please input your company ticker.",
-                },
-              ]}
-            >
-              <Input placeholder="Ticker name" size="large" />
-            </Form.Item>
-            <Form.Item>
-              <Button type="primary" htmlType="submit">
-                Submit
-              </Button>
-            </Form.Item>
-          </Form>
-        </Card>
+          <Card
+            title="Create your private company"
+            bordered={false}
+            style={{ width: 500, alignSelf: "center" }}
+          >
+            <Form name="basic" layout="vertical" onFinish={onFinish}>
+              <Form.Item
+                name="company_name"
+                style={{
+                  paddingBottom: 5,
+                }}
+                rules={[
+                  {
+                    required: true,
+                    message: "Please input your company name.",
+                  },
+                ]}
+              >
+                <Input placeholder="Company name" size="large" />
+              </Form.Item>
+              <Form.Item
+                name="ticker"
+                style={{
+                  paddingBottom: 5,
+                }}
+                rules={[
+                  {
+                    required: true,
+                    message: "Please input your company ticker.",
+                  },
+                ]}
+              >
+                <Input placeholder="Ticker name" size="large" />
+              </Form.Item>
+              <Form.Item>
+                <Button type="primary" htmlType="submit">
+                  Submit
+                </Button>
+              </Form.Item>
+            </Form>
+          </Card>
+          <Image width={500} preview={false} src={CompanyImage} />
+        </div>
       )}
     </div>
   );

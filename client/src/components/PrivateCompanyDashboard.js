@@ -87,7 +87,6 @@ class PrivateCompanyDashboard extends Component {
     const { accounts, match, web3, location } = this.props;
     const { path, url } = match;
     const currentPage = location.pathname.match(/(home|founder|contract)/)[0];
-
     return (
       <div>
         <Layout>
@@ -170,25 +169,27 @@ class PrivateCompanyDashboard extends Component {
                 </div>
               </Content>
             )}
-            <Footer
-              style={{
-                display: "flex",
-                justifyContent: "flex-end",
-                alignItems: "center",
-                paddingRight: 40,
-              }}
-            >
-              <div
-                className={`pulse ${isContractStopped ? "red" : "green"}`}
-              ></div>
-              <div
+            {companyContract && (
+              <Footer
                 style={{
-                  color: isContractStopped ? "#a61d24" : "green",
+                  display: "flex",
+                  justifyContent: "flex-end",
+                  alignItems: "center",
+                  paddingRight: 40,
                 }}
               >
-                {isContractStopped ? "contract stopped" : "contract live"}
-              </div>
-            </Footer>
+                <div
+                  className={`pulse ${isContractStopped ? "red" : "green"}`}
+                ></div>
+                <div
+                  style={{
+                    color: isContractStopped ? "#a61d24" : "green",
+                  }}
+                >
+                  {isContractStopped ? "contract stopped" : "contract live"}
+                </div>
+              </Footer>
+            )}
           </Layout>
         </Layout>
       </div>
