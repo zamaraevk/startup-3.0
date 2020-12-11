@@ -14,7 +14,7 @@
 }
 
 .red {
-  background: red;
+  background: #a61d24;
   animation: red-pulse 2s infinite;
 }
 

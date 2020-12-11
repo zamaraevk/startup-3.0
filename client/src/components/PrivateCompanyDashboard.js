@@ -183,7 +183,7 @@ class PrivateCompanyDashboard extends Component {
               ></div>
               <div
                 style={{
-                  color: isContractStopped ? "red" : "green",
+                  color: isContractStopped ? "#a61d24" : "green",
                 }}
               >
                 {isContractStopped ? "contract stopped" : "contract live"}
