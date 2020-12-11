@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
+import { HashRouter as Router, Switch, Route } from "react-router-dom";
 
 import PrivateCompanyFactoryContract from "./contracts/PrivateCompanyFactory.json";
 import getWeb3 from "./getWeb3";
@@ -61,7 +61,7 @@ class App extends Component {
 
     return (
       <div className="App">
-        <Router>
+        <Router basename="/">
           <Switch>
             <Route path="/company/:address">
               <PrivateCompanyDashboard accounts={accounts} web3={web3} />
