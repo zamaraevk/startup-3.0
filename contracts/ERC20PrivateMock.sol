@@ -17,8 +17,4 @@ contract ERC20PrivateMock is ERC20Private {
     function addOwner(address account) external {
         _addOwner(account);
     }
-
-    function removeOwner(address account) external {
-        _removeOwner(account);
-    }
 }

@@ -33,6 +33,18 @@ contract("ERC20PrivateMock", function (accounts) {
     });
   });
 
+  describe("grantRole", function () {
+    // adding role only with internal _addOwner function
+    it("not allow to grand role with grantRole method", async function () {
+      const ownerRoleAddress = await this.token.OWNER_ROLE({ from: owner1 });
+      await this.token.grantRole(ownerRoleAddress, newOwnerAccount, {
+        from: owner1,
+      });
+
+      expect(await this.token.isOwner(newOwnerAccount)).to.be.false;
+    });
+  });
+
   describe("transfer", function () {
     it("allows to transfer to owner address", async function () {
       await this.token.addOwner(newOwnerAccount, { from: owner1 });

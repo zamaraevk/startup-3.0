@@ -11,7 +11,7 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
  * predefined set of addresses. Example: Private company equities.
  */
 abstract contract ERC20Private is ERC20, AccessControl {
-    // Constants
+    /// Constants
     bytes32 public constant OWNER_ROLE = keccak256("OWNER");
 
     /**
@@ -22,9 +22,9 @@ abstract contract ERC20Private is ERC20, AccessControl {
         _;
     }
 
-    // Public functions
+    /// Public functions
     /**
-     * @dev Contract constructor sets initial owner and owner role as admin's role.
+     * @dev Contract constructor sets initial owner and the Owner role as admin's role.
      * @param _owner First owner -- contract creator.
      */
     constructor(address _owner) public {
@@ -39,19 +39,23 @@ abstract contract ERC20Private is ERC20, AccessControl {
         return hasRole(OWNER_ROLE, account);
     }
 
-    // Internal functions
+    /**
+     * @dev Override to block this behaivour
+     * @dev Adding new role only available thru {_addOwner}
+     */
+    function grantRole(bytes32 role, address account) public override {}
+
+    /**
+     * @dev Override to block this behaivour
+     */
+    function revokeRole(bytes32 role, address account) public override {}
+
+    /// Internal functions
     /**
      * @dev Add an account to the owner role.
      */
     function _addOwner(address account) internal virtual onlyOwner {
-        grantRole(OWNER_ROLE, account);
-    }
-
-    /**
-     * @dev Remove an account from the owner role.
-     */
-    function _removeOwner(address account) internal virtual onlyOwner {
-        revokeRole(OWNER_ROLE, account);
+        _setupRole(OWNER_ROLE, account);
     }
 
     /**
