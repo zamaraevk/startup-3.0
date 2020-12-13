@@ -5,7 +5,7 @@ import { Layout, Menu, Tag, Typography } from "antd";
 import PrivateCompanyContract from "../contracts/PrivateCompany.json";
 import {
   HomeOutlined,
-  StockOutlined,
+  UserOutlined,
   PaperClipOutlined,
 } from "@ant-design/icons";
 
@@ -118,7 +118,7 @@ class PrivateCompanyDashboard extends Component {
               <Menu.Item key="home" icon={<HomeOutlined />}>
                 <Link to={`${url}/home`}>Home</Link>
               </Menu.Item>
-              <Menu.Item key="founder" icon={<StockOutlined />}>
+              <Menu.Item key="founder" icon={<UserOutlined />}>
                 <Link to={`${url}/founder`}>Founder</Link>
               </Menu.Item>
               <Menu.Item key="contract" icon={<PaperClipOutlined />}>
