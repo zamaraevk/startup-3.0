@@ -1,5 +1,7 @@
 # Startup 3.0
 
+<img src="https://github.com/zamaraevk/startup-3.0/blob/main/client/src/assets/company.svg" width="350">
+
 ## Demo
 
 The project is deployed to the IPFS network via Fleek.
