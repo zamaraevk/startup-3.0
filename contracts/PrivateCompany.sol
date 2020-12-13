@@ -227,6 +227,7 @@ contract PrivateCompany is ERC20Private {
     function getEquityHolderBalance(address holderAddress)
         public
         view
+        onlyFounder
         returns (
             uint256 currentBalance,
             uint256 lockedBalance,
@@ -298,15 +299,16 @@ contract PrivateCompany is ERC20Private {
     {
         confirmations[transactionId][msg.sender] = true;
         emit LogTransactionConfirmation(msg.sender, transactionId);
-        executeTransaction(transactionId);
+        _executeTransaction(transactionId);
     }
 
+    /// Private functions
     /**
      * @dev Allows anyone to execute a confirmed transaction.
      * @param transactionId Transaction ID.
      */
-    function executeTransaction(uint256 transactionId)
-        public
+    function _executeTransaction(uint256 transactionId)
+        private
         stopInEmergency
         onlyFounder
         confirmed(transactionId)
@@ -339,7 +341,6 @@ contract PrivateCompany is ERC20Private {
         }
     }
 
-    /// Private functions
     /**
      * @dev Returns the confirmation status of a transaction.
      * @param transactionId Transaction ID.
