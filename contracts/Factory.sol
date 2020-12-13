@@ -2,14 +2,14 @@
 pragma solidity >0.6.0;
 
 contract Factory {
-    // Events
+    /// Events
     event ContractInstantiation(address sender, address instantiation);
 
-    // Storage
+    /// Storage
     mapping(address => bool) public isInstantiation;
     mapping(address => address[]) public instantiations;
 
-    // Public functions
+    /// Public functions
     /**
      * @param creator Contract creator address.
      * @return Returns number of instantiations by creator.
@@ -22,7 +22,7 @@ contract Factory {
         return instantiations[creator].length;
     }
 
-    // Internal functions
+    /// Internal functions
     /**
      * @dev @dev Registers contract in factory registry.
      * @param instantiation Address of contract instantiation.

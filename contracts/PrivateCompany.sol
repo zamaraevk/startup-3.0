@@ -14,15 +14,15 @@ import "@openzeppelin/contracts/math/SafeMath.sol";
  * @notice This final project for Consensys bootcamp. DO NOT USE IN PRODUCTION.
  */
 contract PrivateCompany is ERC20Private {
-    // Libraries
+    /// Libraries
     using SafeMath for uint256;
     using BokkyPooBahsDateTimeLibrary for uint256;
 
-    // Constants
+    /// Constants
     uint256 public constant TOTAL_SUPPLY = 10000;
     uint256 internal constant TOKEN_VESTING_TIME = 4; // 4 years for the full vesting
 
-    // Events
+    /// Events
     event LogDeposit(address indexed sender, uint256 value);
     event LogFounderEquityDistribution(
         address indexed founderAddress,
@@ -46,7 +46,7 @@ contract PrivateCompany is ERC20Private {
     event LogContractStopped();
     event LogContractResume();
 
-    // Storage
+    /// Storage
     uint256 public equityPool;
     address[] public founders;
     mapping(address => EquityHolder) equityHolders;
@@ -56,7 +56,7 @@ contract PrivateCompany is ERC20Private {
     bool public vestingSchedule = false;
     bool public stopped = false;
 
-    // Enums
+    /// Enums
     enum TransactionType {
         External,
         NewFounder,
@@ -64,7 +64,7 @@ contract PrivateCompany is ERC20Private {
         DestroyCompany
     }
 
-    // Structs
+    /// Structs
     struct EquityHolder {
         uint256 lockTimeStart;
         uint256 currentBalance;
@@ -82,7 +82,7 @@ contract PrivateCompany is ERC20Private {
         bool executed;
     }
 
-    // Modifiers
+    /// Modifiers
     modifier onlyIfNotLaunched {
         require(!vestingSchedule);
         _;
@@ -136,7 +136,7 @@ contract PrivateCompany is ERC20Private {
         if (msg.value > 0) LogDeposit(msg.sender, msg.value);
     }
 
-    // Public functions
+    /// Public functions
     /**
      * @dev Contract constructor creates private token and
      * assigning sender as first founder.
@@ -194,7 +194,7 @@ contract PrivateCompany is ERC20Private {
 
     /**
      * @param transactionId Transaction ID.
-     * @dev Transaction detals(type/confirmation status/execution status).
+     * @dev Transaction details.
      */
     function getTransactionDetails(uint256 transactionId)
         public
@@ -339,7 +339,7 @@ contract PrivateCompany is ERC20Private {
         }
     }
 
-    // Private functions
+    /// Private functions
     /**
      * @dev Returns the confirmation status of a transaction.
      * @param transactionId Transaction ID.
@@ -360,11 +360,13 @@ contract PrivateCompany is ERC20Private {
     /**
      * @dev Sets equal amounts of equities for founders
      * with the vesting schedule (4 years duration)
+     * 90% to initial founders
+     * 10% to equity pool
      */
     function _launchVestingSchedule() private onlyFounder onlyIfNotLaunched {
-        uint256 totalSupply = TOTAL_SUPPLY.mul(10**uint256(decimals()));
-        uint256 founderDistributonSupply = totalSupply.mul(90).div(100); // 90% goes to initial founders / 10% to equity pool
-        equityPool = totalSupply.sub(founderDistributonSupply);
+        uint256 supply = TOTAL_SUPPLY.mul(10**uint256(decimals()));
+        uint256 founderDistributonSupply = supply.mul(90).div(100);
+        equityPool = supply.sub(founderDistributonSupply);
         uint256 equityAmount = founderDistributonSupply.div(founders.length);
 
         for (uint256 i = 0; i < founders.length; i++) {
