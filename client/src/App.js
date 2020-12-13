@@ -23,7 +23,7 @@ class App extends Component {
       // Use web3 to get the user's accounts.
       const accounts = await web3.eth.getAccounts();
       // Rinkeby Testnet Network
-      const contractAddress = "0x8e8ce40A2304031090A7f0BEd887cbEFf9EA9E4C";
+      const contractAddress = "0x8427e05D57fCf51ABE3a3018336Cd90297f387d8";
 
       // Get the contract instance.
       const instance = new web3.eth.Contract(

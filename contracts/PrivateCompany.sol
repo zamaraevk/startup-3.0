@@ -55,6 +55,7 @@ contract PrivateCompany is ERC20Private {
     uint256 public transactionCount;
     bool public vestingSchedule = false;
     bool public stopped = false;
+    bool private lockEquityHolderBalance;
 
     /// Enums
     enum TransactionType {
@@ -250,10 +251,11 @@ contract PrivateCompany is ERC20Private {
         uint256 unreleasedAmount = _releasableEquityAmount(msg.sender);
 
         require(
-            unreleasedAmount > 0,
+            !lockEquityHolderBalance && unreleasedAmount > 0,
             "PrivateCompany: no tokens to release at this time"
         );
 
+        lockEquityHolderBalance = true;
         EquityHolder storage equityHolder = equityHolders[msg.sender];
 
         equityHolder.currentBalance = equityHolder.currentBalance.add(
@@ -266,6 +268,7 @@ contract PrivateCompany is ERC20Private {
 
         _mint(msg.sender, unreleasedAmount);
         emit LogReleasedEquityForHolder(msg.sender, unreleasedAmount);
+        lockEquityHolderBalance = false;
     }
 
     /**
