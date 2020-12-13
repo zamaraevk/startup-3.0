@@ -34,7 +34,7 @@ For unit tests, I choose to cover all the most important parts that critical for
 
 **This project is required to have Metamask connected to the browser.**
 
-Client-side is connected to the contract deployed to Rinkeby Testnet Network, address `0x8e8ce40A2304031090A7f0BEd887cbEFf9EA9E4C`
+Client-side is connected to the contract deployed to Rinkeby Testnet Network, address `0x8427e05D57fCf51ABE3a3018336Cd90297f387d8`
 
 1. Navigate to `/client` folder
 2. Run `yarn install` to install all client-side dependencies.
