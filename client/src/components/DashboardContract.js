@@ -27,14 +27,14 @@ class DashboardContract extends Component {
   };
 
   destroyContract = async () => {
-    const { accounts, companyContract, match } = this.props;
+    const { accounts, companyContract } = this.props;
 
     this.setState({ loading: "destroy" });
     await companyContract.methods
       .submitTransaction("DestroyCompany", accounts[0], 0, "0x00")
       .send({ from: accounts[0] });
 
-    window.location.replace(`/company/${match.params.address}/home`);
+    this.setState({ loading: null });
   };
 
   render() {

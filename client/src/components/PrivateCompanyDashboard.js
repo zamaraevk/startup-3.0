@@ -84,7 +84,7 @@ class PrivateCompanyDashboard extends Component {
       ticker,
       isContractStopped,
     } = this.state;
-    const { accounts, match, web3, location, history } = this.props;
+    const { accounts, match, web3, location } = this.props;
     const { path, url } = match;
     const currentPage = location.pathname.match(/(home|founder|contract)/)[0];
     return (
