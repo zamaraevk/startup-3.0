@@ -16,8 +16,8 @@ URL: https://morning-term-8658.on.fleek.co
 
 ## Folder structure
 
-`root directory` has a standard truffle project structure. It has `package.json` to install all necessary dependencies for local contract development.
-`client/` folder is a client-side part of the project. It was built with `truffle unbox react` and has CRA under the hood.
+- `root directory` has a standard truffle project structure. It has `package.json` to install all necessary dependencies for local contract development.
+- `client/` folder is a client-side part of the project. It was built with `truffle unbox react` and has CRA under the hood.
 
 ## Javascript unit tests
 
