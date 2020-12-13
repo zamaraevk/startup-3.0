@@ -23,7 +23,7 @@ URL: https://morning-term-8658.on.fleek.co
 
 For unit tests, I choose to cover all the most important parts that critical for the correct contract execution, such as:
 
-- correct was to add a new owner, only via internal \_addOwner.
+- correct way to add a new owner, only via internal `_addOwner`.
 - private equity (ERC20 tokens) can only be transferred between owners
 - public grantRole from Access Control contract has to be blocked
 - factory contract test to make sure that the new instance can be created
