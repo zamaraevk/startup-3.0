@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Switch, Route, Link, Redirect, withRouter } from "react-router-dom";
+import { Switch, Route, Link, withRouter } from "react-router-dom";
 import { Layout, Menu, Tag, Typography } from "antd";
 
 import PrivateCompanyContract from "../contracts/PrivateCompany.json";
@@ -26,7 +26,6 @@ class PrivateCompanyDashboard extends Component {
     companyContract: null,
     notOwner: false,
     isContractStopped: false,
-    ready: false,
   };
 
   componentDidMount = async () => {
@@ -66,7 +65,6 @@ class PrivateCompanyDashboard extends Component {
           companyContract: instance,
           companyName,
           ticker,
-          ready: true,
         });
       } else {
         this.setState({
@@ -74,29 +72,21 @@ class PrivateCompanyDashboard extends Component {
         });
       }
     } catch (error) {
-      const { history } = this.props;
-      history.push("/");
       console.log("errrrr", error);
     }
   };
 
   render() {
     const {
-      ready,
       balance,
       companyContract,
       companyName,
       ticker,
       isContractStopped,
     } = this.state;
-    const { accounts, match, web3, location } = this.props;
+    const { accounts, match, web3, location, history } = this.props;
     const { path, url } = match;
     const currentPage = location.pathname.match(/(home|founder|contract)/)[0];
-
-    if (ready && !companyContract) {
-      return <Redirect to="/" />;
-    }
-
     return (
       <div>
         <Layout>
