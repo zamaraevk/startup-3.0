@@ -55,7 +55,7 @@ This Web 3.0 application allows creating a multisig based private company with a
 
 - First founder created the private company contract with a certain name and the ticker. This contract will have its internal ERC20 token which can circulate only between founders.
 - Founder added couple more founders to the company.
-- After all, founders agreed and launched a vesting schedule. 90% of all internal tocken supply(equity) is distributed equally between founders on the schedule with the 4-year duration.
+- After all, founders agreed and launched a vesting schedule. 90% of all internal token supply(equity) is distributed equally between founders on the schedule with the 4-year duration.
 - After the vesting schedule launch, 10% of equity will stay in the Equity pool for future company needs.
 - Anyone can send ETH to the company contract as an investment.
 - Founders can agree and send the external transaction with ETH to pay for any company needs.
